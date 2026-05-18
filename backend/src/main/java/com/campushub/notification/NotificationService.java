@@ -6,12 +6,14 @@ import com.campushub.notification.dto.UnreadCountResponse;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class NotificationService {
+
+    private static final AtomicLong ID_GENERATOR = new AtomicLong(System.currentTimeMillis());
+
     private final JdbcClient jdbcClient;
 
     public NotificationService(JdbcClient jdbcClient) {
@@ -74,10 +76,7 @@ public class NotificationService {
     }
 
     public void createNotification(Long userId, String title, String content, String eventType) {
-        long notificationId = LocalDateTime.now()
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli();
+        long notificationId = ID_GENERATOR.incrementAndGet();
         jdbcClient.sql("""
                         INSERT INTO biz_notification(notification_id, user_id, title, content, event_type)
                         VALUES (:notificationId, :userId, :title, :content, :eventType)
