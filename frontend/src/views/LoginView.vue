@@ -52,7 +52,7 @@ async function handleLogin() {
     const data = await login(form)
     setToken(data.token)
     setUserId(data.userId)
-    router.push('/profile')
+    router.push('/requirements')
   } catch (error) {
     message.value = error.message
   } finally {

@@ -26,11 +26,17 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { isLoggedIn, clearToken } from './utils/auth'
 
 const router = useRouter()
-const loggedIn = computed(() => isLoggedIn())
+const route = useRoute()
+
+const loggedIn = computed(() => {
+  // localStorage itself is not reactive, so use route changes to refresh the menu after login/logout.
+  route.fullPath
+  return isLoggedIn()
+})
 
 function handleLogout() {
   clearToken()
