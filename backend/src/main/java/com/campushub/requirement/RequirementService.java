@@ -4,6 +4,7 @@ import com.campushub.common.exception.BusinessException;
 import com.campushub.entity.BizRequirement;
 import com.campushub.entity.RequirementType;
 import com.campushub.mapper.BizRequirementMapper;
+import com.campushub.notification.NotificationService;
 import com.campushub.requirement.dto.CreateRequirementRequest;
 import com.campushub.requirement.dto.PageResponse;
 import com.campushub.requirement.dto.RequirementDetailResponse;
@@ -19,10 +20,13 @@ import java.util.Map;
 public class RequirementService {
     private final JdbcClient jdbcClient;
     private final BizRequirementMapper bizRequirementMapper;
+    private final NotificationService notificationService;
 
-    public RequirementService(JdbcClient jdbcClient, BizRequirementMapper bizRequirementMapper) {
+    public RequirementService(JdbcClient jdbcClient, BizRequirementMapper bizRequirementMapper,
+                              NotificationService notificationService) {
         this.jdbcClient = jdbcClient;
         this.bizRequirementMapper = bizRequirementMapper;
+        this.notificationService = notificationService;
     }
 
     public PageResponse<RequirementListItem> listRequirements(
@@ -122,6 +126,63 @@ public class RequirementService {
         entity.setStatus("PENDING");
 
         bizRequirementMapper.insert(entity);
+        notificationService.createNotification(
+                publisherId,
+                "需求发布成功",
+                "你的需求“" + request.title() + "”已发布，当前状态为待接单。",
+                "REQUIREMENT_PUBLISHED"
+        );
         return entity.getReqId();
+    }
+
+    public PageResponse<RequirementListItem> recommendRequirements(Long userId, Integer page, Integer pageSize) {
+        String campus = jdbcClient.sql("SELECT campus FROM sys_user WHERE user_id = :userId")
+                .param("userId", userId)
+                .query(String.class)
+                .optional()
+                .orElse(null);
+
+        int safePage = page == null || page < 1 ? 1 : page;
+        int safePageSize = pageSize == null ? 10 : Math.min(Math.max(pageSize, 1), 50);
+        int offset = (safePage - 1) * safePageSize;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("campus", campus);
+        params.put("limit", safePageSize);
+        params.put("offset", offset);
+
+        Long total = jdbcClient.sql("""
+                        SELECT COUNT(*)
+                        FROM biz_requirement r
+                        WHERE r.status = 'PENDING' AND r.publisher_id <> :userId
+                        """)
+                .param("userId", userId)
+                .query(Long.class)
+                .single();
+
+        var list = jdbcClient.sql("""
+                        SELECT r.req_id, r.title, r.budget, r.type, r.status, r.created_at,
+                               COALESCE(u.nickname, u.username) AS publisher_name
+                        FROM biz_requirement r
+                        LEFT JOIN sys_user u ON r.publisher_id = u.user_id
+                        WHERE r.status = 'PENDING' AND r.publisher_id <> :userId
+                        ORDER BY CASE WHEN :campus IS NOT NULL AND u.campus = :campus THEN 0 ELSE 1 END,
+                                 r.created_at DESC
+                        LIMIT :limit OFFSET :offset
+                        """)
+                .params(params)
+                .query((rs, rowNum) -> new RequirementListItem(
+                        rs.getLong("req_id"),
+                        rs.getString("title"),
+                        rs.getBigDecimal("budget"),
+                        rs.getString("type"),
+                        rs.getString("status"),
+                        rs.getString("publisher_name"),
+                        rs.getTimestamp("created_at").toLocalDateTime()
+                ))
+                .list();
+
+        return new PageResponse<>(total == null ? 0 : total, safePage, safePageSize, list);
     }
 }

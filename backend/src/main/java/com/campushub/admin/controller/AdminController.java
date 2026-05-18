@@ -7,6 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/admin")
 public class AdminController {
@@ -27,5 +30,23 @@ public class AdminController {
         
         adminService.cancelRequirement(reqId, adminId);
         return ApiResponse.success("违规需求已成功下架", null);
+    }
+
+    @GetMapping("/users")
+    public ApiResponse<List<Map<String, Object>>> listUsers(HttpServletRequest request) {
+        Long adminId = currentUser.requireUserId(request);
+        return ApiResponse.success(adminService.listUsers(adminId));
+    }
+
+    @GetMapping("/requirements")
+    public ApiResponse<List<Map<String, Object>>> listRequirements(HttpServletRequest request) {
+        Long adminId = currentUser.requireUserId(request);
+        return ApiResponse.success(adminService.listRequirements(adminId));
+    }
+
+    @GetMapping("/orders")
+    public ApiResponse<List<Map<String, Object>>> listOrders(HttpServletRequest request) {
+        Long adminId = currentUser.requireUserId(request);
+        return ApiResponse.success(adminService.listOrders(adminId));
     }
 }

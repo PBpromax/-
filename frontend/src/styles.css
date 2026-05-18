@@ -247,6 +247,39 @@ textarea {
   border-left: 4px solid #1664d9;
 }
 
+.success {
+  background: #e9f5ef;
+  border-color: #95d5b2;
+  color: #0b6b3a;
+}
+
+.error {
+  background: #fff0f0;
+  border-color: #f2a6a6;
+  color: #9b1c1c;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-row {
+  border-top: 1px solid #e3e8ef;
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+}
+
+.admin-row:first-of-type {
+  border-top: 0;
+}
+
+.admin-row small {
+  color: #607080;
+}
+
 @media (max-width: 760px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -285,6 +318,10 @@ textarea {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-grid {
     grid-template-columns: 1fr;
   }
 }

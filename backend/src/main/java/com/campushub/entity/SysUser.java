@@ -18,6 +18,8 @@ public class SysUser {
 
     private String username;
 
+    private String nickname;
+
     @TableField("password_hash")
     private String passwordHash;
 
@@ -28,6 +30,17 @@ public class SysUser {
     private String studentId;
 
     private String campus;
+
+    private String college;
+
+    private String major;
+
+    private String grade;
+
+    private String bio;
+
+    @TableField("contact_visible")
+    private Boolean contactVisible;
 
     @TableField("credit_score")
     private Integer creditScore;

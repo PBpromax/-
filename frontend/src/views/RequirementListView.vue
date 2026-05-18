@@ -26,6 +26,7 @@
         <option value="CANCELED">已取消</option>
       </select>
       <button class="primary" @click="applyFilters">筛选</button>
+      <button @click="loadRecommendations">智能推荐</button>
     </div>
 
     <p v-if="message" class="message">{{ message }}</p>
@@ -58,7 +59,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { listRequirements } from '../api/requirements'
+import { listRequirements, recommendRequirements } from '../api/requirements'
 
 const requirements = ref([])
 const total = ref(0)
@@ -97,6 +98,21 @@ function applyFilters() {
 function changePage(page) {
   filters.page = page
   loadRequirements()
+}
+
+async function loadRecommendations() {
+  message.value = ''
+  try {
+    const data = await recommendRequirements({ page: 1, pageSize: filters.pageSize })
+    requirements.value = data.list
+    total.value = data.total
+    filters.page = data.page
+    if (data.list.length === 0) {
+      message.value = '暂无可推荐需求'
+    }
+  } catch (error) {
+    message.value = error.message
+  }
 }
 
 onMounted(loadRequirements)

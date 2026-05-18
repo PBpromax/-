@@ -22,6 +22,17 @@
         <span>接单者：{{ order.receiverName }}</span>
       </div>
       <p class="description">{{ order.reqDescription }}</p>
+      <div class="toolbar">
+        <button class="primary" :disabled="order.status !== 'IN_PROGRESS'" @click="updateStatus('SUBMIT')">
+          提交验收
+        </button>
+        <button class="primary" :disabled="order.status !== 'TO_CONFIRM'" @click="updateStatus('CONFIRM')">
+          确认完成
+        </button>
+        <button :disabled="order.status === 'COMPLETED' || order.status === 'CANCELED'" @click="updateStatus('CANCEL')">
+          取消订单
+        </button>
+      </div>
     </article>
   </section>
 </template>
@@ -29,7 +40,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { getOrderDetail } from '../api/orders'
+import { changeOrderStatus, getOrderDetail } from '../api/orders'
 
 const route = useRoute()
 const order = ref(null)
@@ -43,6 +54,18 @@ function formatTime(value) {
 async function loadOrder() {
   try {
     order.value = await getOrderDetail(route.params.orderId)
+  } catch (error) {
+    messageType.value = 'message error'
+    message.value = error.message
+  }
+}
+
+async function updateStatus(event) {
+  message.value = ''
+  try {
+    order.value = await changeOrderStatus(route.params.orderId, event)
+    messageType.value = 'message success'
+    message.value = '订单状态已更新'
   } catch (error) {
     messageType.value = 'message error'
     message.value = error.message

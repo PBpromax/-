@@ -9,6 +9,7 @@
         <RouterLink to="/orders">我的订单</RouterLink>
         <RouterLink to="/profile">个人资料</RouterLink>
         <RouterLink to="/notifications">消息通知</RouterLink>
+        <RouterLink to="/admin">管理后台</RouterLink>
         <a href="#" @click.prevent="handleLogout">退出</a>
       </template>
       <template v-else>

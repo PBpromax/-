@@ -8,6 +8,7 @@ import com.campushub.common.exception.ApiCode;
 import com.campushub.common.exception.BusinessException;
 import com.campushub.entity.SysUser;
 import com.campushub.mapper.SysUserMapper;
+import com.campushub.notification.NotificationService;
 import com.campushub.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,7 @@ public class AuthService {
     private final SysUserMapper sysUserMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final NotificationService notificationService;
 
     public void register(RegisterRequest request) {
         boolean exists = sysUserMapper.exists(new QueryWrapper<SysUser>()
@@ -38,6 +40,12 @@ public class AuthService {
         user.setCreditScore(100);
 
         sysUserMapper.insert(user);
+        notificationService.createNotification(
+                user.getUserId(),
+                "欢迎加入 CampusHub",
+                "你的账号已注册成功，可以开始发布和接取校园互助需求。",
+                "AUTH_REGISTER"
+        );
     }
 
     public LoginResponse login(LoginRequest request) {

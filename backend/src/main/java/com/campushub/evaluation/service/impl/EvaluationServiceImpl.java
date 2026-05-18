@@ -13,6 +13,7 @@ import com.campushub.mapper.BizEvaluationMapper;
 import com.campushub.mapper.BizOrderMapper;
 import com.campushub.mapper.BizRequirementMapper;
 import com.campushub.mapper.SysUserMapper;
+import com.campushub.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ public class EvaluationServiceImpl implements EvaluationService {
     // 注入用户表 Mapper，用于更新信用分
     @Autowired
     private SysUserMapper sysUserMapper;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     @Transactional(rollbackFor = Exception.class) // 开启事务：评价和扣分必须同时成功或同时失败
@@ -106,5 +110,12 @@ public class EvaluationServiceImpl implements EvaluationService {
                 sysUserMapper.updateById(targetUser);
             }
         }
+
+        notificationService.createNotification(
+                targetId,
+                "你收到一条新的评价",
+                "订单 " + orderId + " 收到 " + req.getStar() + " 星评价，信用分已同步更新。",
+                "EVALUATION_SUBMITTED"
+        );
     }
 }

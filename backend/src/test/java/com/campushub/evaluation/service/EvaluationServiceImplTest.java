@@ -12,6 +12,7 @@ import com.campushub.mapper.BizEvaluationMapper;
 import com.campushub.mapper.BizOrderMapper;
 import com.campushub.mapper.BizRequirementMapper;
 import com.campushub.mapper.SysUserMapper;
+import com.campushub.notification.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,8 @@ public class EvaluationServiceImplTest {
     private BizEvaluationMapper bizEvaluationMapper;
     @Mock
     private SysUserMapper sysUserMapper;
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private EvaluationServiceImpl evaluationService;
@@ -86,6 +89,8 @@ public class EvaluationServiceImplTest {
         
         SysUser updatedUser = userCaptor.getValue();
         assertEquals(92, updatedUser.getCreditScore(), "5星好评应该加2分 (90+2=92)");
+        verify(notificationService, times(1))
+                .createNotification(eq(200L), anyString(), anyString(), eq("EVALUATION_SUBMITTED"));
     }
 
     @Test
@@ -108,6 +113,8 @@ public class EvaluationServiceImplTest {
         
         SysUser updatedUser = userCaptor.getValue();
         assertEquals(0, updatedUser.getCreditScore(), "1星极差扣2分，但信用分最低只能到0分，不能为负数");
+        verify(notificationService, times(1))
+                .createNotification(eq(200L), anyString(), anyString(), eq("EVALUATION_SUBMITTED"));
     }
 
     @Test

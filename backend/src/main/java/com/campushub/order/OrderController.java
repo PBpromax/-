@@ -1,6 +1,7 @@
 package com.campushub.order;
 
 import com.campushub.common.api.ApiResponse;
+import com.campushub.order.dto.ChangeOrderStatusRequest;
 import com.campushub.order.dto.CreateOrderRequest;
 import com.campushub.order.dto.OrderDetailResponse;
 import com.campushub.order.dto.OrderListItem;
@@ -9,6 +10,7 @@ import com.campushub.security.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,5 +59,16 @@ public class OrderController {
     ) {
         Long userId = currentUser.requireUserId(httpRequest);
         return ApiResponse.success(orderService.getOrderDetail(orderId, userId));
+    }
+
+    @PatchMapping("/{orderId:\\d+}/status")
+    public ApiResponse<OrderDetailResponse> changeOrderStatus(
+            @PathVariable Long orderId,
+            @Valid @RequestBody ChangeOrderStatusRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        Long userId = currentUser.requireUserId(httpRequest);
+        OrderDetailResponse response = orderService.changeOrderStatus(orderId, userId, request.event());
+        return ApiResponse.success("订单状态更新成功", response);
     }
 }

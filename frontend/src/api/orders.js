@@ -13,3 +13,10 @@ export function listOrders(params) {
 export function getOrderDetail(orderId) {
   return request(`/api/v1/orders/${orderId}`)
 }
+
+export function changeOrderStatus(orderId, event) {
+  return request(`/api/v1/orders/${orderId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ event })
+  })
+}

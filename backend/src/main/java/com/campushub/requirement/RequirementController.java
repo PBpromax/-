@@ -50,6 +50,16 @@ public class RequirementController {
         return ApiResponse.success(requirementService.listRequirements(keyword, type, status, page, pageSize));
     }
 
+    @GetMapping("/recommendations")
+    public ApiResponse<PageResponse<RequirementListItem>> recommendRequirements(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer pageSize,
+            HttpServletRequest httpRequest
+    ) {
+        Long userId = currentUser.requireUserId(httpRequest);
+        return ApiResponse.success(requirementService.recommendRequirements(userId, page, pageSize));
+    }
+
     @GetMapping("/{reqId:\\d+}")
     public ApiResponse<RequirementDetailResponse> getRequirementDetail(@PathVariable Long reqId) {
         return ApiResponse.success(requirementService.getRequirementDetail(reqId));
