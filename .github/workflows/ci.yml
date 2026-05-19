@@ -46,7 +46,7 @@ jobs:
         run: npm run build --if-present
 
   backend-check:
-    name: Backend Style and Compile
+    name: Backend Test and Build
     runs-on: ubuntu-latest
     if: ${{ hashFiles('backend/pom.xml') != '' }}
     defaults:
@@ -66,8 +66,24 @@ jobs:
       - name: Check code style
         run: mvn -B checkstyle:check
 
-      - name: Compile
-        run: mvn -B -DskipTests compile
+      - name: Run tests with coverage gate
+        run: mvn -B verify
+
+      - name: Upload backend test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: ignore
+
+      - name: Upload backend coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-report
+          path: backend/target/site/jacoco/
+          if-no-files-found: ignore
 
   ci-summary:
     name: CI Summary
@@ -93,7 +109,8 @@ jobs:
 # 执行 build（npm run build --if-present）
 # 后端流程（存在 backend/pom.xml 时自动启用）
 # 执行 Checkstyle 风格检查（mvn -B checkstyle:check）
-# 执行编译检查（mvn -B -DskipTests compile）
+# 执行测试、覆盖率阈值校验和打包构建（mvn -B verify）
+# 上传 Surefire 测试报告和 JaCoCo 覆盖率报告，便于失败定位
 # 触发条件
 # push 到 main、develop
 # pull request 到 main、develop

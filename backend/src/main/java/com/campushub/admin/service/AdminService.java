@@ -11,6 +11,10 @@ public interface AdminService {
 
     List<Map<String, Object>> listUsers(Long adminId);
 
+    void updateUser(Long adminId, Long userId, Map<String, Object> updates);
+
+    void deleteUser(Long adminId, Long userId);
+
     List<Map<String, Object>> listRequirements(Long adminId);
 
     List<Map<String, Object>> listOrders(Long adminId);

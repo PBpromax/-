@@ -5,6 +5,7 @@ import com.campushub.notification.dto.NotificationItem;
 import com.campushub.notification.dto.UnreadCountResponse;
 import com.campushub.security.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,5 +55,12 @@ public class NotificationController {
         Long currentUserId = currentUser.requireUserId(request);
         int updated = notificationService.markAllAsRead(currentUserId);
         return ApiResponse.success("全部通知已读", Map.of("updated", updated));
+    }
+
+    @DeleteMapping("/read")
+    public ApiResponse<Map<String, Integer>> deleteReadNotifications(HttpServletRequest request) {
+        Long currentUserId = currentUser.requireUserId(request);
+        int deleted = notificationService.deleteReadNotifications(currentUserId);
+        return ApiResponse.success("已清除已读通知", Map.of("deleted", deleted));
     }
 }

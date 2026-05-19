@@ -10,21 +10,35 @@
 
     <p v-if="message" :class="messageType">{{ message }}</p>
 
-    <article v-if="requirement" class="detail-panel">
-      <div class="detail-meta">
-        <span>分类：{{ requirement.type }}</span>
-        <span>状态：{{ requirement.status }}</span>
-        <span>预算：{{ Number(requirement.budget).toFixed(2) }}</span>
+    <article v-if="requirement" class="detail-panel requirement-detail-panel">
+      <div class="requirement-detail-head">
+        <div class="requirement-detail-title">
+          <span class="detail-label">需求标题</span>
+          <h2>{{ requirement.title }}</h2>
+        </div>
+        <div class="requirement-detail-price">
+          <span>预算</span>
+          <strong>￥{{ Number(requirement.budget).toFixed(2) }}</strong>
+        </div>
       </div>
-      <p class="description">{{ requirement.description }}</p>
 
-      <button
-        class="primary"
-        :disabled="!requirement.acceptable || accepting"
-        @click="handleAccept"
-      >
-        {{ accepting ? '接单中...' : (requirement.acceptable ? '接单' : '当前不可接单') }}
-      </button>
+      <p class="description requirement-detail-description">{{ requirement.description }}</p>
+
+      <div class="requirement-detail-footer">
+        <div class="detail-meta">
+          <span>分类：{{ typeLabel(requirement.type) }}</span>
+          <span :class="['status', requirement.status.toLowerCase()]">{{ statusLabel(requirement.status) }}</span>
+          <span>{{ requirement.publisherName || '匿名用户' }}</span>
+        </div>
+
+        <button
+          class="primary detail-accept-button"
+          :disabled="!requirement.acceptable || accepting"
+          @click="handleAccept"
+        >
+          {{ accepting ? '接单中...' : (requirement.acceptable ? '接单' : '当前不可接单') }}
+        </button>
+      </div>
     </article>
   </section>
 </template>
@@ -42,6 +56,29 @@ const accepting = ref(false)
 
 function formatTime(value) {
   return value ? value.replace('T', ' ').slice(0, 16) : ''
+}
+
+function statusLabel(status) {
+  return {
+    PENDING: '待接单',
+    ACCEPTED: '已接单',
+    COMPLETED: '已完成',
+    CANCELED: '已取消'
+  }[status] || status
+}
+
+function typeLabel(type) {
+  return {
+    EXPRESS: '快递跑腿',
+    STUDY: '学习求助',
+    SECOND_HAND: '二手交易',
+    TUTORING: '学业辅导',
+    MATERIAL: '资料共享',
+    TEAM_UP: '组队招募',
+    CARPOOL: '拼车出行',
+    QA: '问答求助',
+    OTHER: '其他'
+  }[type] || type
 }
 
 async function loadRequirement() {

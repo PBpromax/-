@@ -9,7 +9,7 @@
 
     <p v-if="message" :class="messageType">{{ message }}</p>
 
-    <form class="form-grid" @submit.prevent="handlePublish">
+    <form class="form-grid publish-grid" @submit.prevent="handlePublish">
       <label>
         标题
         <input
@@ -89,11 +89,6 @@ const form = reactive({
 })
 
 function validate() {
-  if (form.title.trim().length < 5) {
-    message.value = '标题至少需要 5 个字符'
-    messageType.value = 'message error'
-    return false
-  }
   if (form.budget === null || form.budget === '') {
     message.value = '请填写预算金额'
     messageType.value = 'message error'

@@ -20,3 +20,10 @@ export function changeOrderStatus(orderId, event) {
     body: JSON.stringify({ event })
   })
 }
+
+export function submitEvaluation(orderId, data) {
+  return request(`/api/v1/orders/${orderId}/evaluations`, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}

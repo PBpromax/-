@@ -38,6 +38,23 @@ public class AdminController {
         return ApiResponse.success(adminService.listUsers(adminId));
     }
 
+    @PutMapping("/users/{userId}")
+    public ApiResponse<Void> updateUser(
+            HttpServletRequest request,
+            @PathVariable Long userId,
+            @RequestBody Map<String, Object> updates) {
+        Long adminId = currentUser.requireUserId(request);
+        adminService.updateUser(adminId, userId, updates);
+        return ApiResponse.success("用户信息已更新", null);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ApiResponse<Void> deleteUser(HttpServletRequest request, @PathVariable Long userId) {
+        Long adminId = currentUser.requireUserId(request);
+        adminService.deleteUser(adminId, userId);
+        return ApiResponse.success("用户已删除", null);
+    }
+
     @GetMapping("/requirements")
     public ApiResponse<List<Map<String, Object>>> listRequirements(HttpServletRequest request) {
         Long adminId = currentUser.requireUserId(request);

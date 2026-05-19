@@ -1,6 +1,8 @@
 -- Keep this copy aligned with /mysql-init/init.sql for local backend-oriented setup.
+SET NAMES utf8mb4;
 CREATE DATABASE IF NOT EXISTS `campushub_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE `campushub_db`;
+SET character_set_connection = utf8mb4;
 
 DROP TABLE IF EXISTS `biz_evaluation`;
 DROP TABLE IF EXISTS `biz_notification`;

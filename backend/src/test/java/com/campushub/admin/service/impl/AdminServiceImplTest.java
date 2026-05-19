@@ -6,6 +6,7 @@ import com.campushub.entity.SysUser;
 import com.campushub.mapper.BizRequirementMapper;
 import com.campushub.mapper.SysUserMapper;
 import com.campushub.notification.NotificationService;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.ArgumentMatchers;
+import java.util.Map;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +29,8 @@ class AdminServiceImplTest {
     private BizRequirementMapper bizRequirementMapper;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private JdbcClient jdbcClient;
 
     @InjectMocks
     private AdminServiceImpl adminService;
@@ -38,10 +42,12 @@ class AdminServiceImplTest {
     void setUp() {
         adminUser = new SysUser();
         adminUser.setUserId(1L);
+        adminUser.setUsername("admin_test");
         adminUser.setRole(1);
 
         normalUser = new SysUser();
         normalUser.setUserId(2L);
+        normalUser.setUsername("normal_user");
         normalUser.setRole(0);
     }
 
@@ -105,5 +111,22 @@ class AdminServiceImplTest {
         BusinessException ex = assertThrows(BusinessException.class,
                 () -> adminService.cancelRequirement(100L, 3L));
         assertEquals(403, ex.getCode());
+    }
+
+    @Test
+    void updateUser_ShouldClampCreditAndPreventExtraAdmins() {
+        when(sysUserMapper.selectById(1L)).thenReturn(adminUser);
+        when(sysUserMapper.selectById(2L)).thenReturn(normalUser);
+
+        adminService.updateUser(1L, 2L, Map.of(
+                "nickname", "新昵称",
+                "creditScore", 120,
+                "role", 1
+        ));
+
+        verify(sysUserMapper).updateById(ArgumentMatchers.<SysUser>argThat(user ->
+                "新昵称".equals(user.getNickname())
+                        && user.getCreditScore() == 100
+                        && user.getRole() == 0));
     }
 }

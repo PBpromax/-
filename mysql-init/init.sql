@@ -1,6 +1,8 @@
 -- 1. 创建并使用系统专属数据库
+SET NAMES utf8mb4;
 CREATE DATABASE IF NOT EXISTS `campushub_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE `campushub_db`;
+SET character_set_connection = utf8mb4;
 
 -- 2. 清理历史表结构（注意顺序：先删有关联外键逻辑的子表，再删父表）
 DROP TABLE IF EXISTS `biz_evaluation`;

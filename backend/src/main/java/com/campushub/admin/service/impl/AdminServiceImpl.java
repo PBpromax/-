@@ -54,13 +54,51 @@ public class AdminServiceImpl implements AdminService {
     public List<Map<String, Object>> listUsers(Long adminId) {
         requireAdmin(adminId);
         return jdbcClient.sql("""
-                        SELECT user_id, username, nickname, campus, credit_score, role, created_at
+                        SELECT user_id, username, nickname, student_id, campus, college, major, grade,
+                               bio, contact_visible, credit_score, role, created_at
                         FROM sys_user
                         ORDER BY created_at DESC
                         LIMIT 100
                         """)
                 .query()
                 .listOfRows();
+    }
+
+    @Override
+    public void updateUser(Long adminId, Long userId, Map<String, Object> updates) {
+        requireAdmin(adminId);
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        user.setNickname(asString(updates.get("nickname")));
+        user.setStudentId(asString(updates.get("studentId")));
+        user.setCampus(asString(updates.get("campus")));
+        user.setCollege(asString(updates.get("college")));
+        user.setMajor(asString(updates.get("major")));
+        user.setGrade(asString(updates.get("grade")));
+        user.setBio(asString(updates.get("bio")));
+        user.setContactVisible(asBoolean(updates.get("contactVisible")));
+        user.setCreditScore(clamp(asInteger(updates.get("creditScore"), user.getCreditScore()), 0, 100));
+        user.setRole("admin_test".equals(user.getUsername()) ? 1 : 0);
+        sysUserMapper.updateById(user);
+    }
+
+    @Override
+    public void deleteUser(Long adminId, Long userId) {
+        requireAdmin(adminId);
+        if (adminId.equals(userId)) {
+            throw new BusinessException(400, "不能删除当前登录管理员");
+        }
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        if ("admin_test".equals(user.getUsername())) {
+            throw new BusinessException(400, "admin_test 管理员账号必须保留");
+        }
+        deleteUserRelatedData(userId);
+        sysUserMapper.deleteById(userId);
     }
 
     @Override
@@ -99,5 +137,67 @@ public class AdminServiceImpl implements AdminService {
         if (user == null || user.getRole() == null || user.getRole() != 1) {
             throw new BusinessException(403, "越权操作：仅系统管理员可执行此操作");
         }
+    }
+
+    private void deleteUserRelatedData(Long userId) {
+        jdbcClient.sql("""
+                        DELETE FROM biz_evaluation
+                        WHERE reviewer_id = :userId OR target_id = :userId
+                           OR order_id IN (
+                               SELECT o.order_id
+                               FROM biz_order o
+                               JOIN biz_requirement r ON o.req_id = r.req_id
+                               WHERE o.receiver_id = :userId OR r.publisher_id = :userId
+                           )
+                        """)
+                .param("userId", userId)
+                .update();
+        jdbcClient.sql("""
+                        DELETE FROM biz_order
+                        WHERE receiver_id = :userId
+                           OR req_id IN (SELECT req_id FROM biz_requirement WHERE publisher_id = :userId)
+                        """)
+                .param("userId", userId)
+                .update();
+        jdbcClient.sql("DELETE FROM biz_requirement WHERE publisher_id = :userId")
+                .param("userId", userId)
+                .update();
+        jdbcClient.sql("DELETE FROM biz_notification WHERE user_id = :userId")
+                .param("userId", userId)
+                .update();
+    }
+
+    private String asString(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String text = String.valueOf(value).trim();
+        return text.isEmpty() ? null : text;
+    }
+
+    private Boolean asBoolean(Object value) {
+        if (value instanceof Boolean b) {
+            return b;
+        }
+        if (value == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(String.valueOf(value));
+    }
+
+    private Integer asInteger(Object value, Integer fallback) {
+        if (value instanceof Number n) {
+            return n.intValue();
+        }
+        try {
+            return value == null ? fallback : Integer.parseInt(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    private int clamp(Integer value, int min, int max) {
+        int safeValue = value == null ? min : value;
+        return Math.max(min, Math.min(max, safeValue));
     }
 }

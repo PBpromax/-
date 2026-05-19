@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 public record CreateRequirementRequest(
         @NotBlank(message = "标题不能为空")
-        @Size(min = 5, max = 50, message = "标题长度需在 5-50 字符之间")
+        @Size(min = 1, max = 50, message = "标题长度需在 1-50 字符之间")
         String title,
 
         @NotBlank(message = "描述不能为空")

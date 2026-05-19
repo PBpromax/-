@@ -75,6 +75,15 @@ public class NotificationService {
                 .update();
     }
 
+    public int deleteReadNotifications(Long currentUserId) {
+        return jdbcClient.sql("""
+                        DELETE FROM biz_notification
+                        WHERE user_id = :userId AND read_status = 1
+                        """)
+                .param("userId", currentUserId)
+                .update();
+    }
+
     public void createNotification(Long userId, String title, String content, String eventType) {
         long notificationId = ID_GENERATOR.incrementAndGet();
         jdbcClient.sql("""

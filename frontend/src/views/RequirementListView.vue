@@ -40,11 +40,11 @@
       >
         <div>
           <h2>{{ item.title }}</h2>
-          <p>{{ item.publisherName || '匿名用户' }} · {{ item.type }} · {{ formatTime(item.createdAt) }}</p>
+          <p>{{ item.publisherName || '匿名用户' }} · {{ typeLabel(item.type) }} · {{ formatTime(item.createdAt) }}</p>
         </div>
         <div class="row-meta">
           <strong>{{ Number(item.budget).toFixed(2) }}</strong>
-          <span :class="['status', item.status.toLowerCase()]">{{ item.status }}</span>
+          <span :class="['status', item.status.toLowerCase()]">{{ statusLabel(item.status) }}</span>
         </div>
       </RouterLink>
     </div>
@@ -72,17 +72,45 @@ const filters = reactive({
   pageSize: 10
 })
 
+function activeRequirements(list) {
+  return list.filter((item) => item.status !== 'CANCELED')
+}
+
 function formatTime(value) {
   return value ? value.replace('T', ' ').slice(0, 16) : ''
+}
+
+function statusLabel(status) {
+  return {
+    PENDING: '待接单',
+    ACCEPTED: '已接单',
+    COMPLETED: '已完成',
+    CANCELED: '已取消'
+  }[status] || status
+}
+
+function typeLabel(type) {
+  return {
+    EXPRESS: '快递跑腿',
+    STUDY: '学习求助',
+    SECOND_HAND: '二手交易',
+    LOST_FOUND: '失物招领',
+    TUTORING: '学业辅导',
+    MATERIAL: '资料共享',
+    TEAM_UP: '组队招募',
+    CARPOOL: '拼车出行',
+    QA: '问答求助',
+    OTHER: '其他'
+  }[type] || type
 }
 
 async function loadRequirements() {
   message.value = ''
   try {
     const data = await listRequirements(filters)
-    requirements.value = data.list
-    total.value = data.total
-    if (data.list.length === 0) {
+    requirements.value = activeRequirements(data.list)
+    total.value = requirements.value.length
+    if (requirements.value.length === 0) {
       message.value = '暂无符合条件的需求'
     }
   } catch (error) {
@@ -104,10 +132,10 @@ async function loadRecommendations() {
   message.value = ''
   try {
     const data = await recommendRequirements({ page: 1, pageSize: filters.pageSize })
-    requirements.value = data.list
-    total.value = data.total
+    requirements.value = activeRequirements(data.list)
+    total.value = requirements.value.length
     filters.page = data.page
-    if (data.list.length === 0) {
+    if (requirements.value.length === 0) {
       message.value = '暂无可推荐需求'
     }
   } catch (error) {

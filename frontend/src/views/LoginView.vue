@@ -16,7 +16,20 @@
       </label>
       <label>
         密码
-        <input v-model="form.password" type="password" maxlength="64" required />
+        <span class="password-field">
+          <input
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            maxlength="64"
+            required
+          />
+          <button
+            :class="['password-toggle', { visible: showPassword }]"
+            type="button"
+            :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+            @click="showPassword = !showPassword"
+          ></button>
+        </span>
       </label>
       <div class="wide">
         <button class="primary" type="submit" :disabled="loading">
@@ -40,11 +53,12 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '../api/auth'
-import { setToken, setUserId } from '../utils/auth'
+import { setToken, setUserId, setUserRole } from '../utils/auth'
 
 const router = useRouter()
 const loading = ref(false)
 const message = ref('')
+const showPassword = ref(false)
 const form = reactive({
   username: '',
   password: ''
@@ -57,6 +71,7 @@ async function handleLogin() {
     const data = await login(form)
     setToken(data.token)
     setUserId(data.userId)
+    setUserRole(data.role)
     router.push('/requirements')
   } catch (error) {
     message.value = error.message

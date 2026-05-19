@@ -183,4 +183,22 @@ class NotificationServiceTest {
         assertEquals(0, notificationService.getUnreadCount(USER_A).unreadCount());
         assertEquals(1, notificationService.getUnreadCount(USER_B).unreadCount());
     }
+
+    @Test
+    void deleteReadNotifications_ShouldDeleteOnlyReadForCurrentUser() {
+        notificationService.createNotification(USER_A, "A未读", "", "E");
+        notificationService.createNotification(USER_A, "A已读", "", "E");
+        notificationService.createNotification(USER_B, "B已读", "", "E");
+
+        Long readA = notificationService.listNotifications(USER_A, false).get(0).notificationId();
+        Long readB = notificationService.listNotifications(USER_B, false).get(0).notificationId();
+        notificationService.markAsRead(USER_A, readA);
+        notificationService.markAsRead(USER_B, readB);
+
+        int deleted = notificationService.deleteReadNotifications(USER_A);
+
+        assertEquals(1, deleted);
+        assertEquals(1, notificationService.listNotifications(USER_A, false).size());
+        assertEquals(1, notificationService.listNotifications(USER_B, false).size());
+    }
 }

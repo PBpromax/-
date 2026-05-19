@@ -19,3 +19,9 @@ export function markAllNotificationsRead() {
     method: 'PATCH'
   })
 }
+
+export function clearReadNotifications() {
+  return request('/api/v1/notifications/read', {
+    method: 'DELETE'
+  })
+}

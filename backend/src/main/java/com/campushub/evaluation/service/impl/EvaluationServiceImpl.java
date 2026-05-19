@@ -103,8 +103,9 @@ public class EvaluationServiceImpl implements EvaluationService {
                 int currentScore = targetUser.getCreditScore() != null ? targetUser.getCreditScore() : 100;
                 int newScore = currentScore + scoreChange;
                 
-                // 确保信用分不会扣成负数
+                // 信用分固定在 0-100，满分后继续加分不再溢出。
                 if (newScore < 0) newScore = 0;
+                if (newScore > 100) newScore = 100;
                 
                 targetUser.setCreditScore(newScore);
                 sysUserMapper.updateById(targetUser);

@@ -85,6 +85,22 @@ class EvaluationServiceImplTest {
     }
 
     @Test
+    void testSubmitEvaluation_5Stars_ShouldNotExceed100() {
+        mockTargetUser.setCreditScore(100);
+        mockReqDto.setStar(5);
+
+        when(bizOrderMapper.selectById(1L)).thenReturn(mockOrder);
+        when(bizRequirementMapper.selectById(10L)).thenReturn(mockReq);
+        when(bizEvaluationMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
+        when(sysUserMapper.selectById(200L)).thenReturn(mockTargetUser);
+
+        evaluationService.submitEvaluation(1L, 100L, mockReqDto);
+
+        verify(sysUserMapper).updateById(ArgumentMatchers.<SysUser>argThat(user ->
+                user.getCreditScore() == 100));
+    }
+
+    @Test
     void testSubmitEvaluation_1Star_ShouldDeduct2PointsAndNotBelowZero() {
         mockTargetUser.setCreditScore(1);
         mockReqDto.setStar(1);
