@@ -61,7 +61,7 @@
         <span class="hint">{{ form.description.length }}/500</span>
       </label>
 
-      <div class="wide" style="display: flex; gap: 12px;">
+      <div class="wide form-actions">
         <button class="primary" type="submit" :disabled="loading">
           {{ loading ? '发布中...' : '发布需求' }}
         </button>

@@ -9,7 +9,7 @@
 
     <p v-if="message" class="message">{{ message }}</p>
 
-    <form class="form-grid" @submit.prevent="handleLogin">
+    <form class="form-grid login-grid" @submit.prevent="handleLogin">
       <label>
         用户名
         <input v-model="form.username" maxlength="64" required autofocus />
@@ -25,9 +25,14 @@
       </div>
     </form>
 
-    <p style="margin-top: 16px; color: #607080;">
-      还没有账号？<RouterLink to="/register" style="color: #1664d9;">去注册</RouterLink>
-    </p>
+    <div class="auth-footer">
+      <p class="auth-switch">
+        还没有账号？<RouterLink to="/register">去注册</RouterLink>
+      </p>
+      <button class="forgot-link" type="button" aria-label="忘记密码找回，功能开发中">
+        忘记密码？
+      </button>
+    </div>
   </section>
 </template>
 

@@ -16,7 +16,7 @@
         <span>状态：{{ order.status }}</span>
         <span>金额：{{ Number(order.amount).toFixed(2) }}</span>
       </div>
-      <div class="detail-meta" style="margin-top: 8px;">
+      <div class="detail-meta">
         <span>需求：{{ order.reqTitle }}</span>
         <span>发布者：{{ order.publisherName }}</span>
         <span>接单者：{{ order.receiverName }}</span>

@@ -9,7 +9,7 @@
 
     <p v-if="message" class="message">{{ message }}</p>
 
-    <form class="form-grid" @submit.prevent="handleRegister">
+    <form class="form-grid register-grid" @submit.prevent="handleRegister">
       <label>
         用户名
         <input v-model="form.username" maxlength="64" required autofocus />
@@ -33,8 +33,8 @@
       </div>
     </form>
 
-    <p style="margin-top: 16px; color: #607080;">
-      已有账号？<RouterLink to="/login" style="color: #1664d9;">去登录</RouterLink>
+    <p class="auth-switch">
+      已有账号？<RouterLink to="/login">去登录</RouterLink>
     </p>
   </section>
 </template>
