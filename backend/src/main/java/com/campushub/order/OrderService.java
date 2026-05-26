@@ -285,7 +285,7 @@ public class OrderService {
                                o.amount, o.status, o.created_at
                         FROM biz_order o
                         JOIN biz_requirement r ON o.req_id = r.req_id
-                        JOIN sys_user ru ON o.receiver_id = ru.user_id
+                        LEFT JOIN sys_user ru ON o.receiver_id = ru.user_id
                         WHERE o.receiver_id = :userId
                         ORDER BY o.created_at DESC
                         LIMIT :limit OFFSET :offset""")

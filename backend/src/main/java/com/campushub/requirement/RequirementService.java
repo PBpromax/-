@@ -166,8 +166,12 @@ public class RequirementService {
                                COALESCE(u.nickname, u.username) AS publisher_name
                         FROM biz_requirement r
                         LEFT JOIN sys_user u ON r.publisher_id = u.user_id
+                        LEFT JOIN (
+                            SELECT DISTINCT type FROM biz_requirement WHERE publisher_id = :userId
+                        ) AS user_types ON r.type = user_types.type
                         WHERE r.status = 'PENDING' AND r.publisher_id <> :userId
                         ORDER BY CASE WHEN :campus IS NOT NULL AND u.campus = :campus THEN 0 ELSE 1 END,
+                                 CASE WHEN user_types.type IS NOT NULL THEN 0 ELSE 1 END,
                                  r.created_at DESC
                         LIMIT :limit OFFSET :offset
                         """)

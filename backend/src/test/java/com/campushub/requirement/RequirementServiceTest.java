@@ -32,6 +32,8 @@ class RequirementServiceTest {
     private static final Long REQ_TUTORING = 1001L;
     private static final Long REQ_EXPRESS = 1002L;
     private static final Long REQ_COMPLETED = 1003L;
+    private static final Long REQ_TUTORING_OTHER = 1004L;
+    private static final Long REQ_EXPRESS_OTHER = 1005L;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +49,12 @@ class RequirementServiceTest {
         jdbcClient.sql("""
                 INSERT INTO sys_user(user_id, username, nickname, password_hash, phone_encrypted, student_id, campus, credit_score, role)
                 VALUES (200, 'other', '其他', 'hash', 'enc', 'S002', '北校区', 100, 0)""").update();
+        jdbcClient.sql("""
+                INSERT INTO sys_user(user_id, username, nickname, password_hash, phone_encrypted, student_id, campus, credit_score, role)
+                VALUES (300, 'tutor', '辅导者', 'hash', 'enc', 'S003', '南校区', 100, 0)""").update();
+        jdbcClient.sql("""
+                INSERT INTO sys_user(user_id, username, nickname, password_hash, phone_encrypted, student_id, campus, credit_score, role)
+                VALUES (400, 'expresser', '快递代取者', 'hash', 'enc', 'S004', '北校区', 100, 0)""").update();
 
         jdbcClient.sql("""
                 INSERT INTO biz_requirement(req_id, publisher_id, title, description, budget, type, status)
@@ -57,6 +65,12 @@ class RequirementServiceTest {
         jdbcClient.sql("""
                 INSERT INTO biz_requirement(req_id, publisher_id, title, description, budget, type, status)
                 VALUES (1003, 100, '已完成需求', '描述', 20.00, 'TUTORING', 'COMPLETED')""").update();
+        jdbcClient.sql("""
+                INSERT INTO biz_requirement(req_id, publisher_id, title, description, budget, type, status)
+                VALUES (1004, 300, '英语辅导', '大学英语四级辅导', 40.00, 'TUTORING', 'PENDING')""").update();
+        jdbcClient.sql("""
+                INSERT INTO biz_requirement(req_id, publisher_id, title, description, budget, type, status)
+                VALUES (1005, 400, '代取外卖', '帮忙取校门口外卖', 5.00, 'EXPRESS', 'PENDING')""").update();
     }
 
     // ==================== listRequirements ====================
@@ -77,7 +91,7 @@ class RequirementServiceTest {
     @Test
     void listRequirements_ShouldFilterByType() {
         PageResponse<RequirementListItem> page = requirementService.listRequirements(null, "EXPRESS", null, 1, 10);
-        assertEquals(1, page.total());
+        assertEquals(2, page.total());
         assertEquals("EXPRESS", page.list().get(0).type());
     }
 
@@ -172,5 +186,26 @@ class RequirementServiceTest {
         for (RequirementListItem item : page.list()) {
             assertEquals("PENDING", item.status(), "推荐应只包含 PENDING 需求");
         }
+    }
+
+    @Test
+    void recommendRequirements_SameTypeShouldRankFirst() {
+        // 用户100历史发布过TUTORING，推荐中同类型应排在异类型前面
+        PageResponse<RequirementListItem> page = requirementService.recommendRequirements(PUBLISHER_ID, 1, 10);
+
+        assertTrue(page.list().size() >= 2, "至少应有2条推荐");
+        // 第一条应该是同类型的 TUTORING（REQ_TUTORING_OTHER），不是 EXPRESS
+        assertEquals("TUTORING", page.list().get(0).type(), "同分类需求应排在首位");
+    }
+
+    @Test
+    void recommendRequirements_SameCampusShouldRankBeforeDifferentType() {
+        // 用户300在南校区，历史发布过TUTORING(1004)，该需求会被排除
+        // 剩余可推荐: REQ_TUTORING(1001,南校区+TUTORING), REQ_EXPRESS(1002,北校区+EXPRESS), REQ_EXPRESS_OTHER(1005,北校区+EXPRESS)
+        // 排序: 同校区+同类型 → REQ_TUTORING(1001)排第一
+        PageResponse<RequirementListItem> page = requirementService.recommendRequirements(300L, 1, 10);
+
+        assertTrue(page.list().size() >= 2, "至少应有2条推荐");
+        assertEquals(REQ_TUTORING, page.list().get(0).reqId(), "同校区+同类型需求应排首位");
     }
 }
