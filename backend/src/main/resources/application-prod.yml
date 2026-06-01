@@ -1,0 +1,35 @@
+# ============================================
+# CampusHub 生产环境配置
+# ============================================
+# 使用 Docker Compose 部署时，数据库和 Redis 通过服务名访问
+# 敏感信息通过环境变量注入
+
+spring:
+  datasource:
+    url: jdbc:mysql://campushub-db:3306/campushub_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:ch_dev}
+    password: ${DB_PASSWORD:ch_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: campushub-redis
+      port: 6379
+      database: 0
+      timeout: 3000ms
+
+mybatis-plus:
+  configuration:
+    # 生产环境关闭 SQL 日志
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+logging:
+  level:
+    root: WARN
+    com.campushub: INFO
+  file:
+    path: /app/logs
+
+campushub:
+  jwt:
+    secret: ${CAMPUSHUB_JWT_SECRET:change-me-in-production-use-a-long-random-base64-string}
+    expiration-ms: 86400000
