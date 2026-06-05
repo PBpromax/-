@@ -1,16 +1,16 @@
 <template>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">CampusHub</div>
+  <div :class="['app-shell', { 'auth-shell': isAuthRoute, 'hub-shell': isHubRoute }]">
+    <aside v-if="!isAuthRoute && !isHubRoute" class="sidebar">
+      <div class="brand">Campus<span>Hub</span></div>
 
       <template v-if="loggedIn">
-        <RouterLink to="/requirements">需求大厅</RouterLink>
-        <RouterLink to="/requirements/publish">发布需求</RouterLink>
-        <RouterLink to="/orders">我的订单</RouterLink>
-        <RouterLink to="/profile">个人资料</RouterLink>
-        <RouterLink to="/notifications">消息通知</RouterLink>
+        <RouterLink to="/requirements"><span class="nav-icon">⌘</span>需求大厅</RouterLink>
+        <RouterLink to="/requirements/publish"><span class="nav-icon">➤</span>发布需求</RouterLink>
+        <RouterLink to="/orders"><span class="nav-icon">▣</span>我的订单</RouterLink>
+        <RouterLink to="/profile"><span class="nav-icon">♙</span>个人资料</RouterLink>
+        <RouterLink to="/notifications"><span class="nav-icon">♢</span>消息通知</RouterLink>
         <RouterLink v-if="adminVisible" to="/admin">管理后台</RouterLink>
-        <a href="#" @click.prevent="showLogoutConfirm = true">退出</a>
+        <a class="sidebar-exit" href="#" @click.prevent="showLogoutConfirm = true"><span class="nav-icon">↪</span>退出</a>
       </template>
       <template v-else>
         <RouterLink to="/login">登录</RouterLink>
@@ -48,6 +48,9 @@ import { isLoggedIn, isAdmin, clearToken } from './utils/auth'
 const router = useRouter()
 const route = useRoute()
 const showLogoutConfirm = ref(false)
+
+const isAuthRoute = computed(() => route.path === '/login' || route.path === '/register')
+const isHubRoute = computed(() => route.path === '/home')
 
 const loggedIn = computed(() => {
   // localStorage itself is not reactive, so use route changes to refresh the menu after login/logout.

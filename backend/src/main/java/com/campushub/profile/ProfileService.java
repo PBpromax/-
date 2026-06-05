@@ -17,7 +17,7 @@ public class ProfileService {
     public ProfileResponse getProfile(Long currentUserId) {
         return jdbcClient.sql("""
                         SELECT user_id, username, nickname, student_id, campus, college, major, grade,
-                               bio, contact_visible, credit_score
+                               bio, contact_visible, credit_score, contact_qq, contact_wechat, contact_phone
                         FROM sys_user
                         WHERE user_id = :userId
                         """)
@@ -27,13 +27,16 @@ public class ProfileService {
                         rs.getString("username"),
                         rs.getString("nickname"),
                         rs.getString("student_id"),
+                        rs.getString("contact_qq"),
+                        rs.getString("contact_wechat"),
+                        rs.getString("contact_phone"),
                         rs.getString("campus"),
                         rs.getString("college"),
                         rs.getString("major"),
                         rs.getString("grade"),
                         rs.getString("bio"),
                         rs.getBoolean("contact_visible"),
-                        rs.getInt("credit_score")
+                        capCreditScore(rs.getInt("credit_score"))
                 ))
                 .optional()
                 .orElseThrow(() -> new BusinessException(404, "用户不存在"));
@@ -43,6 +46,10 @@ public class ProfileService {
         int updated = jdbcClient.sql("""
                         UPDATE sys_user
                         SET nickname = :nickname,
+                            student_id = :studentId,
+                            contact_qq = :qq,
+                            contact_wechat = :wechat,
+                            contact_phone = :phone,
                             campus = :campus,
                             college = :college,
                             major = :major,
@@ -52,6 +59,10 @@ public class ProfileService {
                         WHERE user_id = :userId
                         """)
                 .param("nickname", request.nickname())
+                .param("studentId", request.studentId())
+                .param("qq", request.qq())
+                .param("wechat", request.wechat())
+                .param("phone", request.phone())
                 .param("campus", request.campus())
                 .param("college", request.college())
                 .param("major", request.major())
@@ -64,5 +75,9 @@ public class ProfileService {
             throw new BusinessException(404, "用户不存在");
         }
         return getProfile(currentUserId);
+    }
+
+    private int capCreditScore(int creditScore) {
+        return Math.max(0, Math.min(100, creditScore));
     }
 }

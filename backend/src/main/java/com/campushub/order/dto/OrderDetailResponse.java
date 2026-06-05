@@ -15,6 +15,7 @@ public record OrderDetailResponse(
         BigDecimal amount,
         String status,
         LocalDateTime createdAt,
-        LocalDateTime finishedAt
+        LocalDateTime finishedAt,
+        boolean currentUserEvaluated
 ) {
 }

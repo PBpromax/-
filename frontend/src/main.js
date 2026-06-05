@@ -13,11 +13,13 @@ import NotificationView from './views/NotificationView.vue'
 import OrderListView from './views/OrderListView.vue'
 import OrderDetailView from './views/OrderDetailView.vue'
 import AdminView from './views/AdminView.vue'
+import HomeView from './views/HomeView.vue'
 import { isLoggedIn } from './utils/auth'
 import './styles.css'
 
 const routes = [
-  { path: '/', redirect: '/requirements' },
+  { path: '/', redirect: '/home' },
+  { path: '/home', component: HomeView, meta: { requiresAuth: true, hub: true } },
   { path: '/login', component: LoginView },
   { path: '/register', component: RegisterView },
   { path: '/profile', component: ProfileView, meta: { requiresAuth: true } },
@@ -39,7 +41,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isLoggedIn()) {
     next('/login')
   } else if ((to.path === '/login' || to.path === '/register') && isLoggedIn()) {
-    next('/profile')
+    next('/home')
   } else {
     next()
   }

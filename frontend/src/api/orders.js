@@ -7,22 +7,22 @@ export function listOrders(params) {
       search.append(key, value)
     }
   })
-  return request(`/api/v1/orders?${search.toString()}`)
+  return request(`/v1/orders?${search.toString()}`)
 }
 
 export function getOrderDetail(orderId) {
-  return request(`/api/v1/orders/${orderId}`)
+  return request(`/v1/orders/${orderId}`)
 }
 
 export function changeOrderStatus(orderId, event) {
-  return request(`/api/v1/orders/${orderId}/status`, {
+  return request(`/v1/orders/${orderId}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ event })
   })
 }
 
 export function submitEvaluation(orderId, data) {
-  return request(`/api/v1/orders/${orderId}/evaluations`, {
+  return request(`/v1/orders/${orderId}/evaluations`, {
     method: 'POST',
     body: JSON.stringify(data)
   })

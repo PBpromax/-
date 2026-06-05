@@ -1,51 +1,74 @@
 <template>
-  <section>
-    <header class="page-header">
-      <div>
-        <h1>登录</h1>
-        <p>登录后即可使用 CampusHub 全部功能</p>
+  <section class="login-visual-page">
+    <div class="login-artboard">
+      <div class="login-brand">Campus<span>Hub</span></div>
+      <div class="login-panel">
+        <header class="login-panel-header">
+          <h1>欢迎回来！</h1>
+        </header>
+
+        <form class="form-grid login-grid" @submit.prevent="handleLogin">
+          <label class="login-input-row">
+            <input
+              v-model="form.username"
+              maxlength="64"
+              placeholder="请输入学号/邮箱/手机号"
+              required
+              autofocus
+            />
+          </label>
+          <label class="login-input-row">
+            <span class="password-field">
+              <input
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                maxlength="64"
+                placeholder="请输入密码"
+                required
+              />
+              <button
+                :class="['password-toggle', { visible: showPassword }]"
+                type="button"
+                :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+                @click="showPassword = !showPassword"
+              ></button>
+            </span>
+          </label>
+          <div class="login-options wide">
+            <label class="inline-check">
+              <input type="checkbox" />
+              记住我
+            </label>
+          </div>
+          <div class="wide">
+            <button class="primary" type="submit" :disabled="loading">
+              {{ loading ? '登录中...' : '登录' }}
+            </button>
+          </div>
+        </form>
+
+        <div class="auth-footer">
+          <p class="auth-switch">
+            还没有账号？<RouterLink to="/register">去注册</RouterLink>
+          </p>
+        </div>
       </div>
-    </header>
-
-    <p v-if="message" class="message">{{ message }}</p>
-
-    <form class="form-grid login-grid" @submit.prevent="handleLogin">
-      <label>
-        用户名
-        <input v-model="form.username" maxlength="64" required autofocus />
-      </label>
-      <label>
-        密码
-        <span class="password-field">
-          <input
-            v-model="form.password"
-            :type="showPassword ? 'text' : 'password'"
-            maxlength="64"
-            required
-          />
-          <button
-            :class="['password-toggle', { visible: showPassword }]"
-            type="button"
-            :aria-label="showPassword ? '隐藏密码' : '显示密码'"
-            @click="showPassword = !showPassword"
-          ></button>
-        </span>
-      </label>
-      <div class="wide">
-        <button class="primary" type="submit" :disabled="loading">
-          {{ loading ? '登录中...' : '登录' }}
-        </button>
-      </div>
-    </form>
-
-    <div class="auth-footer">
-      <p class="auth-switch">
-        还没有账号？<RouterLink to="/register">去注册</RouterLink>
-      </p>
-      <button class="forgot-link" type="button" aria-label="忘记密码找回，功能开发中">
-        忘记密码？
-      </button>
     </div>
+
+    <Transition name="login-error-float">
+      <div
+        v-if="message"
+        class="login-error-backdrop"
+        role="presentation"
+        @click.self="message = ''"
+      >
+        <section class="login-error-modal" role="alertdialog" aria-modal="true" aria-labelledby="login-error-title">
+          <h2 id="login-error-title">登录失败</h2>
+          <p>{{ message }}</p>
+          <button class="primary" type="button" @click="message = ''">我知道了</button>
+        </section>
+      </div>
+    </Transition>
   </section>
 </template>
 
@@ -72,7 +95,7 @@ async function handleLogin() {
     setToken(data.token)
     setUserId(data.userId)
     setUserRole(data.role)
-    router.push('/requirements')
+    router.push('/home')
   } catch (error) {
     message.value = error.message
   } finally {

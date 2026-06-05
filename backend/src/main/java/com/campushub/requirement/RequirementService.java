@@ -87,7 +87,8 @@ public class RequirementService {
     public RequirementDetailResponse getRequirementDetail(Long reqId) {
         return jdbcClient.sql("""
                         SELECT r.req_id, r.publisher_id, r.title, r.description, r.budget, r.type,
-                               r.status, r.created_at, COALESCE(u.nickname, u.username) AS publisher_name
+                               r.status, r.created_at, COALESCE(u.nickname, u.username) AS publisher_name,
+                               u.contact_qq, u.contact_wechat, u.contact_phone
                         FROM biz_requirement r
                         LEFT JOIN sys_user u ON r.publisher_id = u.user_id
                         WHERE r.req_id = :reqId
@@ -97,6 +98,9 @@ public class RequirementService {
                         rs.getLong("req_id"),
                         rs.getLong("publisher_id"),
                         rs.getString("publisher_name"),
+                        rs.getString("contact_qq"),
+                        rs.getString("contact_wechat"),
+                        rs.getString("contact_phone"),
                         rs.getString("title"),
                         rs.getString("description"),
                         rs.getBigDecimal("budget"),

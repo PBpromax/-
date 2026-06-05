@@ -1,77 +1,109 @@
-<script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { fetchHealth } from '@/api/health';
-
-const loading = ref(false);
-const statusText = ref('待连接');
-const serviceName = ref('CampusHub Backend');
-
-const loadHealth = async () => {
-  loading.value = true;
-  try {
-    const response = await fetchHealth();
-    statusText.value = response.data.data.status;
-    serviceName.value = response.data.message || 'CampusHub Backend';
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '健康检查失败';
-    statusText.value = 'ERROR';
-    ElMessage.error(message);
-  } finally {
-    loading.value = false;
-  }
-};
-
-onMounted(() => {
-  void loadHealth();
-});
-</script>
-
 <template>
-  <div class="page-shell">
-    <section class="hero-card">
-      <div class="hero-copy">
-        <p class="eyebrow">CampusHub · 基础工程</p>
-        <h1>校园互助服务平台</h1>
-        <p class="description">
-          已完成 Spring Boot 后端骨架、Vue 3 前端骨架、MySQL / Redis 接入与统一 API 规范初始搭建。
-        </p>
-        <div class="hero-actions">
-          <el-button type="primary" size="large" :loading="loading" @click="loadHealth">
-            连接后端
-          </el-button>
-          <el-tag :type="statusText === 'UP' ? 'success' : statusText === 'ERROR' ? 'danger' : 'info'" size="large">
-            {{ serviceName }} · {{ statusText }}
-          </el-tag>
-        </div>
-      </div>
-      <div class="hero-panel">
-        <div class="metric-box">
-          <span class="metric-label">API 规范</span>
-          <strong>code / message / data</strong>
-          <small>/api/v1/health 已打通</small>
-        </div>
-        <div class="metric-box accent">
-          <span class="metric-label">数据库</span>
-          <strong>campushub_db</strong>
-          <small>sys_user / biz_requirement / biz_order / biz_evaluation</small>
-        </div>
-      </div>
-    </section>
+  <section class="function-hall">
+    <div class="hall-brand">Campus<span>Hub</span></div>
+    <svg class="hall-path" viewBox="0 0 1000 620" aria-hidden="true">
+      <path d="M245 405 C310 482 400 430 400 342 C495 278 565 250 650 303 C720 342 735 270 795 235" />
+      <circle cx="400" cy="342" r="8" />
+      <circle cx="560" cy="276" r="8" />
+      <circle cx="690" cy="315" r="8" />
+    </svg>
 
-    <section class="feature-grid">
-      <article class="feature-card">
-        <h3>后端基础结构</h3>
-        <p>Spring Boot 3、MyBatis-Plus、Redis、统一异常和响应封装已就绪。</p>
-      </article>
-      <article class="feature-card">
-        <h3>前端基础结构</h3>
-        <p>Vue 3、Vite、Element Plus、路由、Axios 封装与开发代理已配置。</p>
-      </article>
-      <article class="feature-card">
-        <h3>数据库初始化</h3>
-        <p>Compose 挂载 MySQL / Redis，P3 初始化脚本可直接写入目标库。</p>
-      </article>
-    </section>
-  </div>
+    <button
+      v-for="item in actions"
+      :key="item.path"
+      :class="['hall-action', item.className, { leaving: transition.activePath === item.path }]"
+      type="button"
+      :style="{ '--accent': item.color }"
+      @click="goWithTransition(item, $event)"
+    >
+      <span class="hall-action-icon">{{ item.icon }}</span>
+      <strong>{{ item.label }}</strong>
+    </button>
+
+    <button class="hall-logout" type="button" @click="handleLogout">
+      <span>↪</span>
+      退出
+    </button>
+
+    <div
+      v-if="logoutConfirm"
+      class="modal-backdrop"
+      role="presentation"
+      @click.self="logoutConfirm = false"
+    >
+      <section class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="hall-logout-title">
+        <h2 id="hall-logout-title">是否确定退出当前账号</h2>
+        <p>退出后需要重新登录才能继续使用 CampusHub。</p>
+        <div class="modal-actions">
+          <button type="button" @click="logoutConfirm = false">取消</button>
+          <button class="primary" type="button" @click="confirmLogout">确定退出</button>
+        </div>
+      </section>
+    </div>
+
+    <div
+      v-if="transition.visible"
+      class="hall-transition"
+      :style="{
+        '--x': `${transition.x}px`,
+        '--y': `${transition.y}px`,
+        '--color': transition.color
+      }"
+      aria-hidden="true"
+    >
+      <span class="hall-transition-ripple"></span>
+      <span class="hall-transition-wash"></span>
+    </div>
+  </section>
 </template>
+
+<script setup>
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { clearToken } from '../utils/auth'
+
+const router = useRouter()
+const logoutConfirm = ref(false)
+
+const actions = [
+  { label: '发布需求', path: '/requirements/publish', icon: '➤', color: '#f59e0b', className: 'publish' },
+  { label: '需求大厅', path: '/requirements', icon: '🤝', color: '#22c55e', className: 'requirements' },
+  { label: '我的订单', path: '/orders', icon: '▣', color: '#3b82f6', className: 'orders' },
+  { label: '个人资料', path: '/profile', icon: '♙', color: '#22b8c7', className: 'profile' },
+  { label: '消息通知', path: '/notifications', icon: '♢', color: '#8b5cf6', className: 'notifications' }
+]
+
+const transition = reactive({
+  visible: false,
+  activePath: '',
+  x: 0,
+  y: 0,
+  color: '#22c55e'
+})
+
+function goWithTransition(item, event) {
+  if (transition.visible) return
+  const rect = event.currentTarget.getBoundingClientRect()
+  transition.x = rect.left + rect.width / 2
+  transition.y = rect.top + rect.height / 2
+  transition.color = item.color
+  transition.activePath = item.path
+  transition.visible = true
+  window.setTimeout(() => {
+    router.push(item.path)
+    window.setTimeout(() => {
+      transition.visible = false
+      transition.activePath = ''
+    }, 180)
+  }, 620)
+}
+
+function handleLogout() {
+  logoutConfirm.value = true
+}
+
+function confirmLogout() {
+  clearToken()
+  router.push('/login')
+}
+</script>

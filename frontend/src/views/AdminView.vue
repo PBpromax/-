@@ -3,7 +3,6 @@
     <header class="page-header">
       <div>
         <h1>管理后台</h1>
-        <p>查看用户、需求和订单，并下架违规或过期需求。</p>
       </div>
       <button class="primary" @click="loadAll">刷新</button>
     </header>

@@ -21,6 +21,9 @@ CREATE TABLE `sys_user` (
   `password_hash` VARCHAR(255) NOT NULL COMMENT '加盐哈希密码',
   `phone_encrypted` VARCHAR(255) NOT NULL COMMENT '加密后的手机号',
   `student_id` VARCHAR(32) NOT NULL COMMENT '学号',
+  `contact_qq` VARCHAR(32) DEFAULT NULL COMMENT 'QQ',
+  `contact_wechat` VARCHAR(64) DEFAULT NULL COMMENT '微信',
+  `contact_phone` VARCHAR(32) DEFAULT NULL COMMENT '电话',
   `campus` VARCHAR(64) DEFAULT NULL COMMENT '校区',
   `college` VARCHAR(64) DEFAULT NULL COMMENT '学院',
   `major` VARCHAR(64) DEFAULT NULL COMMENT '专业',
@@ -97,10 +100,11 @@ CREATE TABLE `biz_notification` (
 -- 4. 演示数据
 INSERT INTO `sys_user` (
   `user_id`, `username`, `nickname`, `password_hash`, `phone_encrypted`, `student_id`,
+  `contact_qq`, `contact_wechat`, `contact_phone`,
   `campus`, `college`, `major`, `grade`, `bio`, `contact_visible`, `credit_score`, `role`
 ) VALUES
-  (10001, 'test_user1', '测试用户A', 'demo_hash', 'demo_phone_A', '20260001', '仙林校区', '软件学院', '软件工程', '2023级', '我是一个普通的测试用户。', 0, 100, 0),
-  (10002, 'test_admin', '系统管理员', 'demo_hash', 'demo_phone_B', '20260002', '仙林校区', '计算机学院', '计算机科学与技术', '2023级', '我是系统管理员，负责处理违规需求。', 0, 100, 1);
+  (10001, 'test_user1', '测试用户A', 'demo_hash', 'demo_phone_A', '20260001', NULL, NULL, NULL, '仙林校区', '软件学院', '软件工程', '2023级', '我是一个普通的测试用户。', 0, 100, 0),
+  (10002, 'test_admin', '系统管理员', 'demo_hash', 'demo_phone_B', '20260002', NULL, NULL, NULL, '仙林校区', '计算机学院', '计算机科学与技术', '2023级', '我是系统管理员，负责处理违规需求。', 0, 100, 1);
 
 INSERT INTO `biz_requirement` (
   `req_id`, `publisher_id`, `title`, `description`, `budget`, `type`, `status`

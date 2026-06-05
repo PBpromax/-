@@ -84,13 +84,13 @@ public class OrderService {
         notificationService.createNotification(
                 publisherId,
                 "你的需求已被接单",
-                "需求 " + reqId + " 已被用户 " + receiverId + " 接单，请及时跟进。",
+                "需求 " + reqId + " 已被用户 " + receiverId + " 接单，订单号 " + order.getOrderId() + "，请及时跟进。",
                 "ORDER_ACCEPTED"
         );
         notificationService.createNotification(
                 receiverId,
                 "接单成功",
-                "你已成功接取需求 " + reqId + "，请按约定完成任务。",
+                "你已成功接取需求 " + reqId + "，订单号 " + order.getOrderId() + "，请按约定完成任务。",
                 "ORDER_ACCEPTED"
         );
 
@@ -186,6 +186,10 @@ public class OrderService {
                                o.receiver_id,
                                COALESCE(ru.nickname, ru.username) AS receiver_name,
                                o.amount, o.status, o.created_at, o.finished_at
+                               , EXISTS (
+                                   SELECT 1 FROM biz_evaluation e
+                                   WHERE e.order_id = o.order_id AND e.reviewer_id = :userId
+                               ) AS current_user_evaluated
                         FROM biz_order o
                         JOIN biz_requirement r ON o.req_id = r.req_id
                         JOIN sys_user pu ON r.publisher_id = pu.user_id
@@ -193,6 +197,7 @@ public class OrderService {
                         WHERE o.order_id = :orderId
                         """)
                 .param("orderId", orderId)
+                .param("userId", userId)
                 .query((rs, rowNum) -> new OrderDetailResponse(
                         rs.getLong("order_id"),
                         rs.getLong("req_id"),
@@ -206,7 +211,8 @@ public class OrderService {
                         rs.getString("status"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("finished_at") != null
-                                ? rs.getTimestamp("finished_at").toLocalDateTime() : null
+                                ? rs.getTimestamp("finished_at").toLocalDateTime() : null,
+                        rs.getBoolean("current_user_evaluated")
                 ))
                 .optional()
                 .orElseThrow(() -> new BusinessException(404, "订单不存在"));

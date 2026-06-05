@@ -1,67 +1,113 @@
 <template>
-  <section>
-    <header class="page-header">
-      <div>
-        <h1>需求大厅</h1>
-        <p>浏览、搜索和筛选校内互助需求。</p>
-      </div>
-      <button @click="loadRequirements">刷新</button>
+  <section class="campus-page requirements-page">
+    <header class="campus-page-header">
+      <h1>需求大厅</h1>
     </header>
 
-    <div class="toolbar">
-      <input v-model="filters.keyword" placeholder="搜索标题或描述" @keyup.enter="applyFilters" />
-      <select v-model="filters.type">
+    <div class="campus-toolbar">
+      <select v-model="filters.type" @change="applyFilters">
         <option value="">全部分类</option>
-        <option value="EXPRESS">快递跑腿</option>
-        <option value="TUTORING">学习求助</option>
-        <option value="SECOND_HAND">二手交易</option>
-        <option value="LOST_FOUND">失物招领</option>
-        <option value="TEAM_UP">组队招募</option>
+        <option v-for="item in categories" :key="item.type" :value="item.type">{{ item.label }}</option>
       </select>
-      <select v-model="filters.status">
-        <option value="">全部状态</option>
-        <option value="PENDING">待接单</option>
-        <option value="ACCEPTED">已接单</option>
-        <option value="COMPLETED">已完成</option>
-        <option value="CANCELED">已取消</option>
-      </select>
-      <button class="primary" @click="applyFilters">筛选</button>
-      <button @click="loadRecommendations">智能推荐</button>
+      <input v-model="filters.keyword" placeholder="搜索标题或描述" @keyup.enter="applyFilters" />
+      <button class="campus-green-btn" @click="applyFilters">搜索</button>
     </div>
 
     <p v-if="message" class="message">{{ message }}</p>
 
-    <div class="list">
-      <RouterLink
-        v-for="item in requirements"
-        :key="item.reqId"
-        class="requirement-row"
-        :to="`/requirements/${item.reqId}`"
-      >
-        <div>
-          <h2>{{ item.title }}</h2>
-          <p>{{ item.publisherName || '匿名用户' }} · {{ typeLabel(item.type) }} · {{ formatTime(item.createdAt) }}</p>
+    <div class="requirements-layout">
+      <article class="glass-panel demand-panel">
+        <div class="panel-title">
+          <h2>可接单需求</h2>
+          <span>{{ requirements.length }}</span>
         </div>
-        <div class="row-meta">
-          <strong>{{ Number(item.budget).toFixed(2) }}</strong>
-          <span :class="['status', item.status.toLowerCase()]">{{ statusLabel(item.status) }}</span>
-        </div>
-      </RouterLink>
-    </div>
 
-    <div class="pagination">
-      <button :disabled="filters.page <= 1" @click="changePage(filters.page - 1)">上一页</button>
-      <span>第 {{ filters.page }} 页 / 共 {{ total }} 条</span>
-      <button :disabled="filters.page * filters.pageSize >= total" @click="changePage(filters.page + 1)">下一页</button>
+        <div class="demand-scroll">
+          <RouterLink
+            v-for="item in requirements"
+            :key="item.reqId"
+            class="demand-bubble"
+            :to="`/requirements/${item.reqId}`"
+            :style="{ '--type-color': categoryMeta(item.type).color }"
+          >
+            <span class="type-orb">
+              <img v-if="categoryMeta(item.type).iconUrl" :src="categoryMeta(item.type).iconUrl" :alt="categoryMeta(item.type).label" />
+              <b v-else>{{ categoryMeta(item.type).icon }}</b>
+            </span>
+            <div class="bubble-main">
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.publisherName || '匿名用户' }} · {{ categoryMeta(item.type).label }}</p>
+              <small>{{ item.description || '暂无描述' }}</small>
+            </div>
+            <div class="bubble-side">
+              <strong>{{ money(item.budget) }}</strong>
+              <span :class="['status', item.status.toLowerCase()]">{{ statusLabel(item.status) }}</span>
+            </div>
+          </RouterLink>
+
+          <div v-if="requirements.length === 0" class="campus-empty">暂无符合条件的需求</div>
+        </div>
+        <button v-if="requirements.length > 0" class="load-more" :disabled="filters.page * filters.pageSize >= total" @click="changePage(filters.page + 1)">
+          查看更多需求⌄
+        </button>
+      </article>
+
+      <aside class="side-stack">
+        <article class="glass-panel mini-orders">
+          <div class="panel-title compact">
+            <h2>我的派单</h2>
+            <RouterLink to="/orders">更多 ›</RouterLink>
+          </div>
+          <div class="mini-scroll">
+            <RouterLink
+              v-for="item in publishedPreview"
+              :key="`p-${item.reqId}-${item.orderId || ''}`"
+              class="mini-order"
+              :to="item.orderId ? `/orders/${item.orderId}` : `/requirements/${item.reqId}`"
+            >
+              <span>{{ item.reqTitle }}</span>
+              <strong>{{ money(item.amount) }}</strong>
+              <small>{{ statusLabel(item.status) }}</small>
+            </RouterLink>
+            <div v-if="publishedPreview.length === 0" class="mini-empty">暂无派单</div>
+          </div>
+        </article>
+
+        <article class="glass-panel mini-orders">
+          <div class="panel-title compact">
+            <h2>我的接单</h2>
+            <RouterLink to="/orders">更多 ›</RouterLink>
+          </div>
+          <div class="mini-scroll">
+            <RouterLink
+              v-for="item in receivedPreview"
+              :key="`r-${item.reqId}-${item.orderId || ''}`"
+              class="mini-order"
+              :to="item.orderId ? `/orders/${item.orderId}` : `/requirements/${item.reqId}`"
+            >
+              <span>{{ item.reqTitle }}</span>
+              <strong>{{ money(item.amount) }}</strong>
+              <small>{{ statusLabel(item.status) }}</small>
+            </RouterLink>
+            <div v-if="receivedPreview.length === 0" class="mini-empty">暂无接单</div>
+          </div>
+        </article>
+      </aside>
     </div>
   </section>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { listRequirements, recommendRequirements } from '../api/requirements'
+import { listRequirements } from '../api/requirements'
+import { listOrders } from '../api/orders'
+import { categoryMeta, requirementCategories } from '../utils/categories'
+
+const categories = requirementCategories
 
 const requirements = ref([])
+const publishedPreview = ref([])
+const receivedPreview = ref([])
 const total = ref(0)
 const message = ref('')
 const filters = reactive({
@@ -69,7 +115,7 @@ const filters = reactive({
   type: '',
   status: '',
   page: 1,
-  pageSize: 10
+  pageSize: 5
 })
 
 function activeRequirements(list) {
@@ -80,41 +126,43 @@ function formatTime(value) {
   return value ? value.replace('T', ' ').slice(0, 16) : ''
 }
 
+function money(value) {
+  return Number(value || 0).toFixed(2)
+}
+
 function statusLabel(status) {
   return {
     PENDING: '待接单',
     ACCEPTED: '已接单',
+    IN_PROGRESS: '进行中',
+    TO_CONFIRM: '待确认',
     COMPLETED: '已完成',
     CANCELED: '已取消'
   }[status] || status
 }
 
-function typeLabel(type) {
-  return {
-    EXPRESS: '快递跑腿',
-    STUDY: '学习求助',
-    SECOND_HAND: '二手交易',
-    LOST_FOUND: '失物招领',
-    TUTORING: '学业辅导',
-    MATERIAL: '资料共享',
-    TEAM_UP: '组队招募',
-    CARPOOL: '拼车出行',
-    QA: '问答求助',
-    OTHER: '其他'
-  }[type] || type
-}
-
 async function loadRequirements() {
   message.value = ''
   try {
-    const data = await listRequirements(filters)
+    const data = await listRequirements(expandedTypeFilters())
     requirements.value = activeRequirements(data.list)
-    total.value = requirements.value.length
-    if (requirements.value.length === 0) {
-      message.value = '暂无符合条件的需求'
-    }
+    total.value = data.total ?? requirements.value.length
   } catch (error) {
     message.value = error.message
+  }
+}
+
+async function loadOrderPreview() {
+  try {
+    const [published, received] = await Promise.all([
+      listOrders({ tab: 'published', page: 1, pageSize: 3 }),
+      listOrders({ tab: 'received', page: 1, pageSize: 2 })
+    ])
+    publishedPreview.value = published.list || []
+    receivedPreview.value = received.list || []
+  } catch {
+    publishedPreview.value = []
+    receivedPreview.value = []
   }
 }
 
@@ -123,25 +171,24 @@ function applyFilters() {
   loadRequirements()
 }
 
+function expandedTypeFilters() {
+  const meta = categoryMeta(filters.type)
+  if (!filters.type || !meta.aliases?.length) {
+    return filters
+  }
+  return {
+    ...filters,
+    type: [meta.type, ...meta.aliases]
+  }
+}
+
 function changePage(page) {
   filters.page = page
   loadRequirements()
 }
 
-async function loadRecommendations() {
-  message.value = ''
-  try {
-    const data = await recommendRequirements({ page: 1, pageSize: filters.pageSize })
-    requirements.value = activeRequirements(data.list)
-    total.value = requirements.value.length
-    filters.page = data.page
-    if (requirements.value.length === 0) {
-      message.value = '暂无可推荐需求'
-    }
-  } catch (error) {
-    message.value = error.message
-  }
-}
-
-onMounted(loadRequirements)
+onMounted(() => {
+  loadRequirements()
+  loadOrderPreview()
+})
 </script>

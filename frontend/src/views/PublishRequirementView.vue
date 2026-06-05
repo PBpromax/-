@@ -1,94 +1,143 @@
 <template>
-  <section>
-    <header class="page-header">
-      <div>
-        <h1>发布需求</h1>
-        <p>填写需求信息，等待其他用户接单。</p>
-      </div>
+  <section class="campus-page publish-page">
+    <header class="campus-page-header">
+      <h1>发布需求</h1>
     </header>
 
     <p v-if="message" :class="messageType">{{ message }}</p>
 
-    <form class="form-grid publish-grid" @submit.prevent="handlePublish">
-      <label>
-        标题
-        <input
-          v-model="form.title"
-          maxlength="50"
-          placeholder="起个简洁明确的标题"
-          required
-        />
-        <span class="hint">{{ form.title.length }}/50</span>
-      </label>
+    <div class="publish-layout">
+      <form class="glass-panel publish-form" @submit.prevent="handlePublish">
+        <section class="publish-step">
+          <h2><span>1</span>填写基础信息</h2>
+          <div class="publish-basic-grid">
+            <label class="field-block">
+              标题
+              <input v-model="form.title" maxlength="50" placeholder="起个简洁明确的标题" required />
+              <small>{{ form.title.length }}/50</small>
+            </label>
 
-      <label>
-        分类
-        <select v-model="form.type" required>
-          <option value="" disabled>请选择需求分类</option>
-          <option value="EXPRESS">快递跑腿</option>
-          <option value="TUTORING">学习求助</option>
-          <option value="SECOND_HAND">二手交易</option>
-          <option value="STUDY_HELP">学业辅导</option>
-          <option value="MATERIAL_SHARE">资料共享</option>
-          <option value="TEAM_UP">组队招募</option>
-          <option value="CARPOOL">拼车出行</option>
-          <option value="Q_AND_A">问答求助</option>
-          <option value="OTHER">其他</option>
-        </select>
-      </label>
+            <div class="field-block category-field">
+              选择需求分类
+              <div class="category-grid">
+                <button
+                  v-for="item in categories"
+                  :key="item.type"
+                  type="button"
+                  :class="['category-card', { selected: form.type === item.type }]"
+                  :style="{ '--type-color': item.color }"
+                  @click="form.type = item.type"
+                >
+                  <span class="category-icon-wrap">
+                    <img v-if="item.iconUrl" :src="item.iconUrl" :alt="item.label" />
+                    <b v-else>{{ item.icon }}</b>
+                  </span>
+                  <span class="category-card-label">{{ item.label }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <label>
-        预算 (元)
-        <input
-          v-model.number="form.budget"
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="0.00"
-          required
-        />
-      </label>
+        <section class="publish-step">
+          <h2><span>2</span>设置任务报酬</h2>
+          <div class="reward-row">
+            <label class="field-block">
+              预算（元）
+              <input v-model.trim="form.budget" type="text" inputmode="decimal" placeholder="￥ 0.00" required />
+              <small>0 元表示无偿互助</small>
+            </label>
+            <div class="reward-tip">
+              <span>💰</span>
+              合理的报酬能让你的需求更快被同学看到。
+            </div>
+          </div>
+        </section>
 
-      <label class="wide">
-        描述
-        <textarea
-          v-model="form.description"
-          maxlength="500"
-          rows="5"
-          placeholder="详细说明需求内容、地点、时间等信息"
-          required
-        ></textarea>
-        <span class="hint">{{ form.description.length }}/500</span>
-      </label>
+        <section class="publish-step">
+          <h2><span>3</span>详细描述需求</h2>
+          <label class="field-block">
+            <textarea
+              v-model="form.description"
+              maxlength="500"
+              rows="5"
+              placeholder="请详细说明需求内容、地点、时间、联系方式或注意事项等信息"
+              required
+            ></textarea>
+            <small>{{ form.description.length }}/500</small>
+          </label>
+        </section>
 
-      <div class="wide form-actions">
-        <button class="primary" type="submit" :disabled="loading">
-          {{ loading ? '发布中...' : '发布需求' }}
-        </button>
-        <button type="button" @click="$router.push('/requirements')">取消</button>
-      </div>
-    </form>
+        <div class="publish-actions">
+          <button type="button" @click="$router.push('/requirements')">取消</button>
+          <button class="campus-green-btn" type="submit" :disabled="loading">
+            {{ loading ? '发布中...' : '立即发布' }}
+          </button>
+        </div>
+      </form>
+
+      <aside class="glass-panel demand-preview">
+        <h2>需求预览</h2>
+        <p>这是你的需求在大厅中的展示效果</p>
+        <article class="preview-card" :style="{ '--type-color': selectedCategory.color }">
+          <div class="preview-top">
+            <span class="type-orb">
+              <img v-if="selectedCategory.iconUrl" :src="selectedCategory.iconUrl" :alt="selectedCategory.label" />
+              <b v-else>{{ selectedCategory.icon }}</b>
+            </span>
+            <div>
+              <small>{{ previewName }}</small>
+              <strong>待接单</strong>
+            </div>
+          </div>
+          <h3>{{ form.title || '标题' }}</h3>
+          <span class="preview-type">{{ selectedCategory.label }}</span>
+          <div class="preview-budget">￥ {{ money(form.budget) }}</div>
+          <div class="preview-desc">
+            <b>描述</b>
+            <p v-if="form.description.trim()">{{ form.description }}</p>
+          </div>
+        </article>
+      </aside>
+    </div>
   </section>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createRequirement } from '../api/requirements'
+import { getProfile } from '../api/profile'
+import { requirementCategories } from '../utils/categories'
 
 const router = useRouter()
 const loading = ref(false)
 const message = ref('')
 const messageType = ref('message')
+const profile = ref(null)
+
+const categories = requirementCategories
 
 const form = reactive({
   title: '',
   description: '',
   budget: null,
-  type: ''
+  type: 'EXPRESS'
 })
 
+const selectedCategory = computed(() => categories.find((item) => item.type === form.type) || categories[0])
+const previewName = computed(() => profile.value?.nickname || profile.value?.username || '用户名')
+
+function money(value) {
+  return Number(value || 0).toFixed(2)
+}
+
 function validate() {
+  if (!form.title.trim()) {
+    message.value = '请填写标题'
+    messageType.value = 'message error'
+    return false
+  }
   if (form.budget === null || form.budget === '') {
     message.value = '请填写预算金额'
     messageType.value = 'message error'
@@ -121,7 +170,7 @@ async function handlePublish() {
     })
     messageType.value = 'message success'
     message.value = `发布成功！需求编号：${data.reqId}`
-    setTimeout(() => router.push(`/requirements/${data.reqId}`), 1500)
+    setTimeout(() => router.push(`/requirements/${data.reqId}`), 900)
   } catch (error) {
     messageType.value = 'message error'
     message.value = error.message
@@ -129,17 +178,14 @@ async function handlePublish() {
     loading.value = false
   }
 }
-</script>
 
-<style scoped>
-.hint {
-  font-size: 12px;
-  color: #607080;
+async function loadProfileForPreview() {
+  try {
+    profile.value = await getProfile()
+  } catch {
+    profile.value = null
+  }
 }
-.success {
-  color: #1a9c5e;
-}
-.error {
-  color: #c0392b;
-}
-</style>
+
+onMounted(loadProfileForPreview)
+</script>
