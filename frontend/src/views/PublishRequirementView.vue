@@ -189,3 +189,30 @@ async function loadProfileForPreview() {
 
 onMounted(loadProfileForPreview)
 </script>
+<style scoped>
+/* 1. 修改网格容器，让它自适应宽度，而不是写死列数 */
+.category-grid {
+  display: grid;
+  /* 核心修复：最小宽度设为 130px（根据实际情况微调），放不下时自动换行 */
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+/* 2. 优化卡片内部布局 */
+.category-card {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 让图标和文字整体居中 */
+  gap: 8px; /* 图标和文字的间距 */
+  padding: 12px 8px;
+  min-width: 0; /* 防止 Flex 子元素溢出 */
+}
+
+/* 3. 给文字加上防溢出保护（如果遇到极端小屏幕，优雅地显示省略号） */
+.category-card-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1; 
+}
+</style>

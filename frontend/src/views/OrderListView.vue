@@ -13,7 +13,7 @@
       <div class="order-filter-row">
         <div class="order-status-tabs">
           <button :class="{ active: statusFilter === '' }" @click="statusFilter = ''">全部</button>
-          <button :class="{ active: statusFilter === 'PENDING' }" @click="statusFilter = 'PENDING'">待接单</button>
+          <button v-if="tab === 'published'" :class="{ active: statusFilter === 'PENDING' }" @click="statusFilter = 'PENDING'">待接单</button>
           <button :class="{ active: statusFilter === 'IN_PROGRESS' }" @click="statusFilter = 'IN_PROGRESS'">进行中</button>
           <button :class="{ active: statusFilter === 'COMPLETED' }" @click="statusFilter = 'COMPLETED'">已完成</button>
         </div>
