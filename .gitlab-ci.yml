@@ -6,11 +6,9 @@ workflow:
 
 stages:
   - check
-  - summary
 
 frontend-check:
   stage: check
-  image: node:20
   rules:
     - exists:
         - frontend/package.json
@@ -29,7 +27,6 @@ frontend-check:
 
 backend-check:
   stage: check
-  image: maven:3.9-eclipse-temurin-17
   rules:
     - exists:
         - backend/pom.xml
@@ -51,21 +48,3 @@ backend-check:
     paths:
       - backend/target/surefire-reports/
       - backend/target/site/jacoco/
-
-ci-summary:
-  stage: summary
-  image: alpine:3.20
-  when: always
-  needs:
-    - job: frontend-check
-      optional: true
-    - job: backend-check
-      optional: true
-  script:
-    - |
-      if [ ! -f frontend/package.json ]; then
-        echo "Frontend check skipped: frontend/package.json not found"
-      fi
-      if [ ! -f backend/pom.xml ]; then
-        echo "Backend check skipped: backend/pom.xml not found"
-      fi
