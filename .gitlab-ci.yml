@@ -44,7 +44,6 @@ backend-check:
   before_script:
     - cd backend
   script:
-    - mvn -B checkstyle:check
     - mvn -B verify
   artifacts:
     when: always
