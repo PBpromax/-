@@ -3,6 +3,7 @@ stages:
 
 check:
   stage: check
+  image: maven:3.9-eclipse-temurin-17
   script:
     - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
     - echo "CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH"
@@ -12,6 +13,8 @@ check:
     - |
       if [ -f frontend/package.json ]; then
         echo "Checking frontend..."
+        apt-get update
+        apt-get install -y nodejs npm
         cd frontend
         node --version
         npm --version
