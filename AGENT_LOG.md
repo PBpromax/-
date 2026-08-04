@@ -76,6 +76,11 @@
 - 结果：通过，`sec-ii-2026-backend` 与 `sec-ii-2026-nginx` 均构建成功。
 - 说明：首次 compose 构建在 Maven `dependency:go-offline -q` 阶段长时间无输出，后续确认这是依赖下载静音导致的等待，不是项目编译失败。
 
+## 2026-08-04 11:55 - 提交与 CI 跟踪
+
+- Git 提交：`37a17a2 docs: finalize AI4SE submission package`，已推送到 `origin/main`。
+- CI 状态：本机未安装 `glab`，无法从命令行直接读取 GitLab pipeline 结果。提交后需要在 GitLab Web CI/CD 页面确认最新 pipeline pass，并在最终提交材料中记录截图或状态。
+
 ## 偏离与教训
 
 - 偏离：项目并非从空仓库开始，无法完整还原所有历史功能的“先红后绿”TDD 过程。
