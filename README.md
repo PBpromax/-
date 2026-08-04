@@ -26,7 +26,7 @@ CampusHub 是一个面向大学校园场景的互助服务平台，用统一的 
 
 - JDK 17
 - Maven 3.8+
-- Node.js 18 或 20
+- Node.js 20 LTS（Node.js 18 也可运行；CI 使用 20）
 - Docker Desktop / Docker Compose v2
 
 启动基础设施：
@@ -76,6 +76,18 @@ demo_pub / pass123456
 demo_rec / pass123456
 ```
 
+管理员演示账号需要在数据库中准备。首次启动后可执行以下 SQL 将初始化管理员 `test_admin` 的密码设置为 `pass123456`：
+
+```bash
+docker exec campushub-mysql mysql -u ch_dev -pch_password campushub_db \
+  -e 'UPDATE sys_user SET password_hash="$2y$10$jb97oCVlvfcHKe9rjrswwuG35Md5TF3ZG941SL5.84uj6OHXzgkw6" WHERE username="test_admin";'
+```
+
+数据库初始化方式：
+
+- 本地 MySQL 容器首次启动时，`mysql-init/init.sql` 会自动执行。
+- 后端测试不依赖本地 MySQL；测试 profile 使用 `backend/src/test/resources/schema-h2.sql` 初始化 H2 内存数据库。
+
 ## 测试与构建
 
 后端单元与集成测试：
@@ -113,9 +125,12 @@ cp .env.example .env
 
 ```text
 CAMPUSHUB_JWT_SECRET
+DB_USERNAME
 DB_PASSWORD
 DB_ROOT_PASSWORD
 ```
+
+`docker-compose-prod.yml` 会强制检查这些变量；缺失时生产容器不会启动。
 
 构建并启动完整生产演示环境：
 
@@ -136,11 +151,19 @@ http://localhost/
 docker compose --env-file .env -f docker-compose-prod.yml down
 ```
 
+生产容器启动后可检查：
+
+```bash
+curl http://localhost/api/v1/health
+```
+
+预期返回后端健康状态 JSON。前端入口为 `http://localhost/`。
+
 ## 安全边界
 
 - 本项目不调用外部 LLM 或付费 API，因此没有用户侧 LLM API Key 存储需求。
 - 需要保护的敏感信息包括 JWT secret、数据库密码、Redis 连接信息和生产 `.env`。
-- 示例配置仅用于本地开发，生产部署必须通过环境变量或 `.env` 覆盖默认值。
+- 示例配置仅用于说明变量名，生产部署必须通过环境变量或 `.env` 提供强密码和长随机 JWT secret。
 - `.env` 是明文配置，不能进入 Git；查看配置状态时不得回显真实密钥。
 - JWT 用于接口鉴权，受保护 API 需要 `Authorization: Bearer <token>`。
 - 当前没有实现短信、邮箱验证和真实支付，不能作为生产商业平台直接上线。
@@ -157,7 +180,7 @@ SPEC.md                  AI4SE 项目规约
 PLAN.md                  AI4SE 实现计划
 SPEC_PROCESS.md          规约与冷启动过程记录
 AGENT_LOG.md             AI 协作过程日志
-REFLECTION.md            反思报告辅助初稿
+REFLECTION.md            反思报告提交候选稿
 ```
 
 ## AI4SE 提交说明
@@ -175,4 +198,4 @@ REFLECTION.md            反思报告辅助初稿
 - 本地开发端口以当前前端代理为准：前端 `5173`，后端 `8092`。
 - 生产 Compose 默认监听宿主机 `80` 端口；若端口被占用，需要调整 `docker-compose-prod.yml` 的 Nginx 端口映射。
 - 初始化数据中的部分旧账号密码可能是占位哈希，演示时建议通过注册页创建新账号。
-- 反思报告 `REFLECTION.md` 是 AI 辅助初稿，最终提交前需要本人重写、确认并标注 AI 辅助范围。
+- 反思报告 `REFLECTION.md` 已整理为候选稿，最终提交前仍需要本人确认真实经历并标注 AI 辅助范围。

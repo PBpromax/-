@@ -95,7 +95,7 @@
 威胁与对策：
 
 - 凭据进入 Git：提供 `.env.example`，真实 `.env` 不提交；README 明确说明。
-- 默认弱口令用于生产：生产 Compose 支持环境变量覆盖；SPEC/README 要求部署前替换强密码和长随机 JWT secret。
+- 默认弱口令用于生产：生产 Compose 对 `DB_USERNAME`、`DB_PASSWORD`、`DB_ROOT_PASSWORD`、`CAMPUSHUB_JWT_SECRET` 使用必填变量校验；缺失时启动失败。
 - 日志泄露 token 或密码：业务日志不打印密码、JWT 明文和数据库密码。
 - 未授权接口访问：后端拦截 `/api/**`，排除认证和健康检查接口；受保护接口依赖 JWT。
 - 越权访问：订单、通知、资料、管理后台需要服务层校验用户身份和角色。
@@ -152,6 +152,7 @@
 - 本地开发可使用 README 中命令行环境变量覆盖。
 - 生产演示使用 `.env` 或 CI/CD secret 注入。
 - `.env` 是明文文件，应限制文件权限，不进入 Git，不通过截图或日志公开。
+- `.env.example`、`docker-compose-prod.yml` 和 Spring prod profile 共享同一组变量名：`DB_USERNAME`、`DB_PASSWORD`、`DB_ROOT_PASSWORD`、`CAMPUSHUB_JWT_SECRET`。
 
 ## 9. 技术选型理由
 
@@ -181,5 +182,5 @@
 - 历史配置中存在开发端口不一致，README 已统一以 `5173` + `8092` 说明。
 - 初始化数据中的旧账号密码可能不可登录，演示建议通过注册页创建账号。
 - 线上部署 URL 需要提交前补充。
-- `REFLECTION.md` 为 AI 辅助初稿，最终文本必须由本人改写并确认。
+- `REFLECTION.md` 已整理为提交候选稿，最终文本仍必须由本人确认真实经历并标注 AI 辅助范围。
 - 没有接入真实短信、邮箱、支付和学校统一认证，系统仅作为课程级可演示应用。

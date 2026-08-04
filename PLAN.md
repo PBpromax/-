@@ -34,19 +34,19 @@
 - 实现要点：记录 brainstorming、关键迭代、冷启动验证计划、CI/测试执行、人工决策和偏离说明。
 - 验证步骤：确认文档包含 Superpowers 七步工作流映射与偏离记录。
 
-### Task 5: 补充反思报告辅助初稿
+### Task 5: 补充反思报告候选稿
 
-- 目标：生成 `REFLECTION.md`，作为本人最终改写的材料。
+- 目标：生成 `REFLECTION.md`，作为本人最终确认和必要改写的材料。
 - 涉及文件：`REFLECTION.md`。
 - 实现要点：覆盖 Superpowers、TDD、subagent、SPEC/PLAN、prompt/context、凭据与分发、批判性思考。
-- 验证步骤：确认开头明确标注“AI 辅助初稿，提交前需本人改写确认”。
+- 验证步骤：确认文末明确说明 AI 辅助范围，并提醒最终内容需要本人确认真实经历与事实准确性。
 
 ### Task 6: 更新 README 与安全配置
 
 - 目标：让 README 满足作业最终交付清单。
 - 涉及文件：`README.md`、`.env.example`。
 - 实现要点：写清项目简介、安装运行、测试、Docker 分发、目录结构、安全边界、已知限制、线上部署 URL 占位；新增不含真实凭据的 `.env.example`。
-- 验证步骤：从 README 可独立找到运行命令、测试命令、分发命令和安全说明。
+- 验证步骤：从 README 可独立找到目录结构、JDK/Node/Docker 版本、数据库初始化方式、管理员账号准备方式、运行命令、测试命令、分发命令、健康检查和安全说明；确认 `.env.example`、`docker-compose-prod.yml`、`application-prod.yml` 变量名一致。
 
 ### Task 7: 更新 GitLab CI
 
@@ -59,7 +59,7 @@
 
 - 目标：证明提交包没有破坏可运行性。
 - 涉及命令：`mvn test`、`npm ci && npm run build`、`docker compose -f docker-compose-prod.yml build`。
-- 验证步骤：记录命令结果到 `AGENT_LOG.md`；若 Docker 构建耗时或受本地环境影响，记录限制与下一步。
+- 验证步骤：记录命令结果到 `AGENT_LOG.md`；若 `mvn test` 或前端构建失败，必须修复并复验；若 Docker 构建因 Docker Hub 网络、daemon 状态等外部环境失败，可记录原因并以 GitLab CI 复验结果为最终证据。
 
 ## 3. 依赖关系
 

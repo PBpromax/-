@@ -23,6 +23,13 @@ fi
 # 2. 切换到项目目录
 cd "$(dirname "$0")"
 
+if [ -f ".env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . ./.env
+    set +a
+fi
+
 # 3. 拉取最新代码（如使用 git 部署）
 if [ -d ".git" ]; then
     echo "[1/4] 拉取最新代码..."
@@ -31,11 +38,24 @@ else
     echo "[1/4] 跳过 git pull（非 git 部署）"
 fi
 
-# 4. 设置环境变量（不在仓库中保存的敏感信息）
-export CAMPUSHUB_JWT_SECRET="${CAMPUSHUB_JWT_SECRET:-$(openssl rand -base64 32)}"
-export DB_USERNAME="${DB_USERNAME:-ch_dev}"
-export DB_PASSWORD="${DB_PASSWORD:-ch_password}"
-export DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD:-root_password}"
+# 4. 检查环境变量（不在仓库中保存的敏感信息）
+if [ -z "${CAMPUSHUB_JWT_SECRET:-}" ]; then
+    export CAMPUSHUB_JWT_SECRET="$(openssl rand -base64 32)"
+    echo "[提示] 未设置 CAMPUSHUB_JWT_SECRET，已为本次部署生成随机值。"
+fi
+
+missing_vars=""
+for var_name in DB_USERNAME DB_PASSWORD DB_ROOT_PASSWORD CAMPUSHUB_JWT_SECRET; do
+    if [ -z "${!var_name:-}" ]; then
+        missing_vars="$missing_vars $var_name"
+    fi
+done
+
+if [ -n "$missing_vars" ]; then
+    echo "[错误] 缺少必要环境变量:$missing_vars"
+    echo "请复制 .env.example 为 .env 并填写强密码后重试。"
+    exit 1
+fi
 
 echo ""
 echo "[2/4] 构建 Docker 镜像..."

@@ -56,23 +56,31 @@
 
 ### 迭代 4：反思报告处理方式
 
-作业要求反思报告必须由本人撰写。用户选择生成“辅助初稿”。因此 `REFLECTION.md` 开头明确标注 AI 辅助性质，最终提交前必须由本人重写和确认。
+作业要求反思报告必须由本人负责真实性和最终表达。用户要求先由 Codex 垫付完成候选稿，因此 `REFLECTION.md` 已覆盖要求中的主要问题点，并在文末说明 AI 辅助范围；最终提交前仍需本人确认经历、事实和措辞是否真实。
 
-## 4. 冷启动验证计划
+## 4. 冷启动验证记录
 
-正式提交前需要使用不同于主开发智能体的新 session 或不同 agent，仅提供 `SPEC.md` 和 `PLAN.md`，要求其完成 1-2 个任务或审查可执行性。
+2026-08-04 使用一个不继承对话历史的子代理执行冷启动验证。输入只包含 `SPEC.md` 和 `PLAN.md` 的内容，要求其选择 1-2 个 task 并在信息不足时暂停提问。
 
-推荐冷启动任务：
+冷启动代理选择的任务：
 
-1. 仅凭 SPEC/PLAN 检查 README 是否能支持全新机器启动。
-2. 仅凭 SPEC/PLAN 检查 `.gitlab-ci.yml` 是否满足 `unit-test` 要求。
+1. Task 6：更新 README 与安全配置。
+2. Task 8：本地验证。
 
-需要记录的问题：
+它暴露的问题：
 
-- agent 是否对端口、凭据、Docker 运行方式产生疑问。
-- agent 是否误以为项目需要 LLM API Key。
-- agent 是否把旧团队文档当作本次提交物。
-- agent 对测试命令和验收标准是否能独立执行。
+- 仅凭 SPEC/PLAN 不能确认真实目录结构，如前端是否在 `frontend/`，后端是否在 `backend/`。
+- README 冷启动要求还需要绑定 JDK/Node 版本、数据库初始化方式、管理员账号准备方式和健康检查地址。
+- Docker 分发说明需要写清启动后访问地址、容器依赖、首次初始化数据库方式。
+- 安全变量名需要和 `.env.example`、Compose、Spring 配置保持一致。
+- Task 8 需要说明测试失败时必须修复并复验，外部环境失败才可记录限制。
+
+据此做出的修订：
+
+- README 补充 Node 版本、`backend/`/`frontend/` 目录命令、`mysql-init/init.sql` 初始化说明、H2 测试初始化说明、管理员账号准备 SQL、生产健康检查地址。
+- SPEC 补充 `.env.example`、`docker-compose-prod.yml`、`application-prod.yml` 的共享变量名。
+- PLAN 补充 Task 6 和 Task 8 的具体验证条件。
+- 生产配置改为强制要求 `DB_USERNAME`、`DB_PASSWORD`、`DB_ROOT_PASSWORD`、`CAMPUSHUB_JWT_SECRET`，避免生产环境静默使用默认弱口令。
 
 ## 5. 已发现的 SPEC 缺陷与修订
 
@@ -84,6 +92,8 @@
   - 修订：SPEC 新增安全与凭据威胁模型，明确本项目不使用 LLM API Key。
 - 缺陷：旧 CI 不运行测试。
   - 修订：GitLab CI 新增 `unit-test` job。
+- 缺陷：冷启动代理无法仅凭 SPEC/PLAN 判断目录结构、数据库初始化和生产变量名。
+  - 修订：README、SPEC、PLAN 补充目录、初始化、管理员账号、健康检查和变量名一致性。
 
 ## 6. 偏离说明
 

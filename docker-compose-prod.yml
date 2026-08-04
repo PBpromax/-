@@ -6,9 +6,9 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: campushub_db
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
-      MYSQL_USER: ${DB_USERNAME:-ch_dev}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-ch_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in .env}
+      MYSQL_USER: ${DB_USERNAME:?set DB_USERNAME in .env}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
@@ -38,9 +38,9 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_USERNAME: ${DB_USERNAME:-ch_dev}
-      DB_PASSWORD: ${DB_PASSWORD:-ch_password}
-      CAMPUSHUB_JWT_SECRET: ${CAMPUSHUB_JWT_SECRET:-change-me-in-production}
+      DB_USERNAME: ${DB_USERNAME:?set DB_USERNAME in .env}
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      CAMPUSHUB_JWT_SECRET: ${CAMPUSHUB_JWT_SECRET:?set CAMPUSHUB_JWT_SECRET in .env}
     depends_on:
       - campushub-db
       - campushub-redis
