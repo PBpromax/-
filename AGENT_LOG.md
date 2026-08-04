@@ -78,7 +78,7 @@
 
 ## 2026-08-04 11:55 - 提交与 CI 跟踪
 
-- Git 提交：`37a17a2 docs: finalize AI4SE submission package` 与后续日志补记提交 `41f71e2 docs: record submission push status`，均已推送到 `origin/main`。当前最终提交点为 `41f71e2`。
+- Git 提交：AI4SE 提交包整理与日志补记提交已推送到 `origin/main`。最终提交点以 `git log -1 --oneline` 为准，避免在日志文件中硬编码自引用 commit hash。
 - CI 状态：本机未安装 `glab`，无法从命令行直接读取 GitLab pipeline 结果。提交后需要在 GitLab Web CI/CD 页面确认最新 pipeline pass，并在最终提交材料中记录截图或状态。
 
 ## 偏离与教训
