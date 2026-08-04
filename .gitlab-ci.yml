@@ -1,38 +1,43 @@
 stages:
-  - check
+  - test
+  - build
 
-check:
-  stage: check
+unit-test:
+  stage: test
   image: maven:3.9-eclipse-temurin-17
   script:
-    - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
-    - echo "CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH"
-    - echo "CI_PIPELINE_SOURCE=$CI_PIPELINE_SOURCE"
-    - pwd
-    - ls -la
-    - |
-      if [ -f frontend/package.json ]; then
-        echo "Checking frontend..."
-        apt-get update
-        apt-get install -y nodejs npm
-        cd frontend
-        node --version
-        npm --version
-        npm ci
-        npm run lint --if-present
-        npm run build --if-present
-        cd ..
-      else
-        echo "Frontend check skipped: frontend/package.json not found"
-      fi
-    - |
-      if [ -f backend/pom.xml ]; then
-        echo "Checking backend..."
-        cd backend
-        java -version
-        mvn --version
-        mvn -B verify
-        cd ..
-      else
-        echo "Backend check skipped: backend/pom.xml not found"
-      fi
+    - cd backend
+    - mvn -B test
+  artifacts:
+    when: always
+    paths:
+      - backend/target/surefire-reports/
+    expire_in: 7 days
+
+frontend-build:
+  stage: build
+  image: node:20
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    when: always
+    paths:
+      - frontend/dist/
+    expire_in: 7 days
+
+docker-build:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker build -t campushub-backend-ci backend
+    - docker build -t campushub-frontend-ci frontend
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

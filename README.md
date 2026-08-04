@@ -1,93 +1,178 @@
-# CampusHub 校园互助服务平台
+# CampusHub AI4SE Final Project
 
-## 项目简介
+CampusHub 是一个面向大学校园场景的互助服务平台，用统一的 Web 应用承接快递代取、学习求助、资料共享、二手交易、组队招募等轻量互助需求。用户可以注册登录、发布需求、浏览和筛选需求、接单、完成订单、互相评价，并通过信用分和消息通知降低微信群/QQ群互助信息碎片化带来的匹配与信任成本。
 
-CampusHub 是一个面向大学校园场景的互助服务平台，旨在为学生提供统一、便捷、可信的需求发布与协作渠道。围绕校园中常见的互助需求，如快递代取、学习辅导、二手交易、活动组队等，平台支持用户发布需求、浏览与筛选信息、完成接单协作，并通过评价与信用机制提升平台信任度。根据课程大作业要求，系统核心覆盖用户管理、需求发布与浏览、订单流程管理，并在此基础上扩展评价信用、消息通知、推荐匹配等功能。 
+本仓库按 AI4SE 期末项目 B 类“非 harness 应用类项目”整理提交。项目不包含自主多轮 agent 主循环，也不调用外部付费 LLM API；本次提交重点展示一个可运行、可测试、可容器分发的真实应用，以及使用 AI 辅助完成需求、计划、实现、验证、评审和反思的工程闭环。
 
-本项目采用前后端分离架构，面向课程要求中的最小可行产品（MVP）进行设计与实现，优先保证 P0 必做功能完整落地，包括注册登录、个人资料管理、需求发布、需求列表与详情、筛选浏览，以及从接单到完成的完整订单状态流转。后续将逐步完善评价与信用体系、站内通知、智能推荐、管理后台等模块。 
+## 功能模块
 
-## 核心功能
-
-- 用户注册与登录
-- 个人资料管理
-- 用户角色切换（需求方 / 服务方）
-- 互助需求发布
-- 需求列表浏览与筛选
-- 需求详情查看
-- 订单接单、确认、进行中、完成、评价的完整流程
-- 双向评分与信用分展示
-- 站内消息通知
-- 管理后台与数据统计（后续扩展）
+- 用户与认证：注册、登录、JWT 鉴权、个人资料查看与修改。
+- 需求大厅：需求发布、列表分页、分类筛选、关键字搜索、详情查看。
+- 订单流程：接单、提交验收、确认完成、取消、参与者权限校验。
+- 评价信用：完成订单后双方评价，评分影响用户信用分。
+- 消息通知：注册、需求、订单、评价等事件的站内通知与未读管理。
+- 管理后台：管理员查看用户、需求、订单，并下架违规需求。
 
 ## 技术栈
 
-### 前端
-- Vue 3
-- Vue Router
-- Pinia
-- Vite
+- 前端：Vue 3、Vue Router、Element Plus、Vite。
+- 后端：Spring Boot 3.3、MyBatis-Plus、Spring Security Crypto、JWT。
+- 数据：MySQL 8、Redis 7；测试环境使用 H2。
+- 分发：Docker Compose，生产演示由 Nginx 提供前端静态资源并代理后端 API。
 
-### 后端
-- Spring Boot
-- Spring Security
-- MyBatis-Plus
+## 本地开发运行
 
-### 数据存储
-- MySQL
-- Redis
+前置依赖：
 
-### 开发与部署
-- Docker
+- JDK 17
+- Maven 3.8+
+- Node.js 18 或 20
+- Docker Desktop / Docker Compose v2
 
-## 技术栈说明
-
-本项目采用 Vue 3 作为前端框架，用于构建响应式用户界面，配合 Vue Router 实现页面路由管理，Pinia 进行状态管理，Vite 提供高效的开发与构建体验。后端采用 Spring Boot 作为核心开发框架，负责接口开发、业务逻辑实现和系统整合；使用 Spring Security 实现基础认证与安全控制；使用 MyBatis-Plus 简化数据库访问与常规 CRUD 开发。数据层以 MySQL 作为主要关系型数据库，后续可结合 Redis 做缓存、热点数据加速与部分并发控制。开发环境方面，项目计划通过 Docker 统一本地运行环境，降低不同开发设备之间的环境差异。  
-
-## 团队分工
-
-| 成员 | 角色 | 职责 |
-|------|------|------|
-| 庞彬 | 需求负责人 / 队长 | 负责需求分析、需求文档整理、团队协作推进与整体进度管理 |
-| 仲嘉辉 | 开发负责人 | 负责核心功能开发推进、前后端联调与主要开发任务协调 |
-| 易容卉 | 架构负责人 | 负责系统架构设计、模块划分、数据库与接口设计 |
-| 谢真婷 | 测试负责人 | 负责测试方案设计、功能测试执行、缺陷跟踪与质量保障 |
-
-## 项目目标
-
-本项目希望在课程周期内完成一个可运行、可演示、可扩展的校园互助平台原型系统。在满足课程大作业要求的基础上，重点实现以下目标：
-
-1. 完成用户管理、需求发布与浏览、订单流程管理等核心功能。
-2. 建立基础的评价与信用体系，提高平台协作可信度。
-3. 在时间允许的情况下，逐步扩展消息通知、智能推荐、管理后台等增强功能。
-4. 通过前后端分离架构和规范化协作流程，提升项目的可维护性与可扩展性。
-
-## 项目背景
-
-在大学校园中，学生之间存在大量日常互助需求，但这些需求通常分散在微信群、QQ 群、贴吧等平台，存在信息碎片化、匹配效率低、缺乏信任机制等问题。CampusHub 希望通过统一的平台，将需求方、服务方与管理员连接起来，帮助学生更方便地发布需求、发现匹配、建立信任并完成协作。 、
-## 说明
-
-本项目为《软件工程与计算 II》课程大作业，项目周期为 10 周，团队规模为 4 人。系统设计与开发将围绕课程要求推进，并结合 AI 辅助工具提升需求分析、文档编写、代码开发与测试效率。 
-
-## 当前可运行模块
-
-庞彬负责的 P4 任务已完成最小可运行实现：
-
-- 个人资料查看与修改：`GET/PUT /api/v1/users/me`
-- 需求列表与筛选：`GET /api/v1/requirements`
-- 需求详情：`GET /api/v1/requirements/{reqId}`
-- 消息通知列表、未读数量、已读更新：`/api/v1/notifications`
-
-本阶段暂用 `X-User-Id: 10001` 作为联调用户标识，登录模块完成后可替换为真实 JWT。
-
-运行方式：
+启动基础设施：
 
 ```bash
-docker-compose up -d
+docker compose up -d
+```
 
+本地 `docker-compose.yml` 暴露端口：
+
+```text
+MySQL: localhost:3307
+Redis: localhost:6379
+```
+
+启动后端。前端开发代理当前指向 `localhost:8092`，因此本地开发后端统一跑在 `8092`：
+
+```bash
 cd backend
-mvn spring-boot:run
+SPRING_DATASOURCE_URL='jdbc:mysql://localhost:3307/campushub_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true' \
+SPRING_DATASOURCE_USERNAME='ch_dev' \
+SPRING_DATASOURCE_PASSWORD='ch_password' \
+SPRING_DATA_REDIS_HOST='localhost' \
+SPRING_DATA_REDIS_PORT='6379' \
+mvn spring-boot:run -Dspring-boot.run.arguments='--server.port=8092'
+```
 
-cd ../frontend
-npm install
+启动前端：
+
+```bash
+cd frontend
+npm ci
 npm run dev
 ```
+
+访问地址：
+
+```text
+前端页面: http://localhost:5173/
+后端健康检查: http://localhost:8092/api/v1/health
+```
+
+演示账号建议通过注册页创建。若需要快速演示，可注册：
+
+```text
+demo_pub / pass123456
+demo_rec / pass123456
+```
+
+## 测试与构建
+
+后端单元与集成测试：
+
+```bash
+cd backend
+mvn test
+```
+
+前端生产构建：
+
+```bash
+cd frontend
+npm ci
+npm run build
+```
+
+容器构建验证：
+
+```bash
+docker compose -f docker-compose-prod.yml build
+```
+
+GitLab CI 配置见 `.gitlab-ci.yml`，其中 `unit-test` job 会运行后端测试；`frontend-build` job 会运行前端依赖安装和构建；`docker-build` job 会验证生产镜像可构建。
+
+## Docker 分发
+
+复制示例环境变量文件并修改生产密钥：
+
+```bash
+cp .env.example .env
+```
+
+`.env` 是明文文件，只能用于本地或受控部署环境，不应提交到 Git。生产环境必须至少替换：
+
+```text
+CAMPUSHUB_JWT_SECRET
+DB_PASSWORD
+DB_ROOT_PASSWORD
+```
+
+构建并启动完整生产演示环境：
+
+```bash
+docker compose --env-file .env -f docker-compose-prod.yml build
+docker compose --env-file .env -f docker-compose-prod.yml up -d
+```
+
+访问：
+
+```text
+http://localhost/
+```
+
+停止：
+
+```bash
+docker compose --env-file .env -f docker-compose-prod.yml down
+```
+
+## 安全边界
+
+- 本项目不调用外部 LLM 或付费 API，因此没有用户侧 LLM API Key 存储需求。
+- 需要保护的敏感信息包括 JWT secret、数据库密码、Redis 连接信息和生产 `.env`。
+- 示例配置仅用于本地开发，生产部署必须通过环境变量或 `.env` 覆盖默认值。
+- `.env` 是明文配置，不能进入 Git；查看配置状态时不得回显真实密钥。
+- JWT 用于接口鉴权，受保护 API 需要 `Authorization: Bearer <token>`。
+- 当前没有实现短信、邮箱验证和真实支付，不能作为生产商业平台直接上线。
+
+## 目录结构
+
+```text
+backend/                 Spring Boot 后端服务
+frontend/                Vue 3 前端应用与 Nginx 配置
+mysql-init/              MySQL 初始化脚本
+docker-compose.yml       本地 MySQL/Redis 基础设施
+docker-compose-prod.yml  生产演示 Compose
+SPEC.md                  AI4SE 项目规约
+PLAN.md                  AI4SE 实现计划
+SPEC_PROCESS.md          规约与冷启动过程记录
+AGENT_LOG.md             AI 协作过程日志
+REFLECTION.md            反思报告辅助初稿
+```
+
+## AI4SE 提交说明
+
+本项目按个人 AI4SE 期末项目提交整理。历史上该代码库曾包含团队课程过程材料，本次整理已移除旧 P0-P4 文档与生成附件，保留可运行源码、测试、CI、容器分发配置和 AI4SE 要求的过程文档。
+
+线上部署 URL：
+
+```text
+待填写：提交前部署到公网后在此补充访问地址。
+```
+
+## 已知限制
+
+- 本地开发端口以当前前端代理为准：前端 `5173`，后端 `8092`。
+- 生产 Compose 默认监听宿主机 `80` 端口；若端口被占用，需要调整 `docker-compose-prod.yml` 的 Nginx 端口映射。
+- 初始化数据中的部分旧账号密码可能是占位哈希，演示时建议通过注册页创建新账号。
+- 反思报告 `REFLECTION.md` 是 AI 辅助初稿，最终提交前需要本人重写、确认并标注 AI 辅助范围。
