@@ -33,7 +33,7 @@ fi
 # 3. 拉取最新代码（如使用 git 部署）
 if [ -d ".git" ]; then
     echo "[1/4] 拉取最新代码..."
-    git pull origin develop
+    git pull "${DEPLOY_REMOTE:-origin}" "${DEPLOY_BRANCH:-main}"
 else
     echo "[1/4] 跳过 git pull（非 git 部署）"
 fi
