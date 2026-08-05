@@ -90,6 +90,17 @@
   - README 和过程文档改为说明 GitHub Actions 作为主要 CI 凭证。
 - 后续：需要将仓库推送到 GitHub，并在 GitHub Actions 页面确认最新 run pass。
 
+## 2026-08-05 - GitHub 推送与 Actions 验证
+
+- GitHub 远端：`github https://github.com/PBpromax/-.git`。
+- 操作：执行 `git push -u github main`，成功将 `main` 推送到 GitHub。
+- GitHub Actions run：`AI4SE CI #1`，地址 `https://github.com/PBpromax/-/actions/runs/30970856087`。
+- 结果：
+  - `Frontend Build`：通过。
+  - `Backend Unit Tests`：通过。
+  - `Docker Build`：通过。
+- 说明：学校 GitLab pipeline 问题已在 README/PLAN/SPEC_PROCESS 中说明；最终提交可使用 GitHub Actions 通过结果作为 CI 凭证。
+
 ## 偏离与教训
 
 - 偏离：项目并非从空仓库开始，无法完整还原所有历史功能的“先红后绿”TDD 过程。

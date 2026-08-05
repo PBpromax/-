@@ -113,6 +113,11 @@ docker compose -f docker-compose-prod.yml build
 
 GitHub Actions 配置见 `.github/workflows/ci.yml`，其中 `unit-test` job 会运行后端测试；`frontend-build` job 会运行前端依赖安装和构建；`docker-build` job 会验证生产镜像可构建。`.gitlab-ci.yml` 保留同等检查项，作为原学校 GitLab 提交要求的兼容配置。
 
+GitHub 仓库与 CI 凭证：
+
+- 仓库地址：https://github.com/PBpromax/-
+- GitHub Actions：AI4SE CI run #1 已通过，包含后端测试、前端构建和 Docker 构建。
+
 ## Docker 分发
 
 复制示例环境变量文件并修改生产密钥：
