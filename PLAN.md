@@ -48,18 +48,18 @@
 - 实现要点：写清项目简介、安装运行、测试、Docker 分发、目录结构、安全边界、已知限制、线上部署 URL 占位；新增不含真实凭据的 `.env.example`。
 - 验证步骤：从 README 可独立找到目录结构、JDK/Node/Docker 版本、数据库初始化方式、管理员账号准备方式、运行命令、测试命令、分发命令、健康检查和安全说明；确认 `.env.example`、`docker-compose-prod.yml`、`application-prod.yml` 变量名一致。
 
-### Task 7: 更新 GitLab CI
+### Task 7: 更新 CI
 
-- 目标：替换 smoke test，满足 `.gitlab-ci.yml` 必须包含 `unit-test` job 的要求。
-- 涉及文件：`.gitlab-ci.yml`。
-- 实现要点：增加后端测试、前端构建和 Docker 构建验证。
-- 验证步骤：静态检查 `unit-test` job 存在；提交后查看最后一次 CI/CD pass。
+- 目标：替换 smoke test，满足 `.gitlab-ci.yml` 必须包含 `unit-test` job 的要求，并在 GitHub 迁移后提供等价 GitHub Actions 验证。
+- 涉及文件：`.gitlab-ci.yml`、`.github/workflows/ci.yml`。
+- 实现要点：增加后端测试、前端构建和 Docker 构建验证；GitHub Actions 与本地验证命令保持一致。
+- 验证步骤：静态检查 `unit-test` job 存在；提交后查看 GitHub Actions 最新 run pass。若学校 GitLab CI 因平台环境失败，在日志中说明并以 GitHub Actions 作为主要凭证。
 
 ### Task 8: 本地验证
 
 - 目标：证明提交包没有破坏可运行性。
 - 涉及命令：`mvn test`、`npm ci && npm run build`、`docker compose -f docker-compose-prod.yml build`。
-- 验证步骤：记录命令结果到 `AGENT_LOG.md`；若 `mvn test` 或前端构建失败，必须修复并复验；若 Docker 构建因 Docker Hub 网络、daemon 状态等外部环境失败，可记录原因并以 GitLab CI 复验结果为最终证据。
+- 验证步骤：记录命令结果到 `AGENT_LOG.md`；若 `mvn test` 或前端构建失败，必须修复并复验；若 Docker 构建因 Docker Hub 网络、daemon 状态等外部环境失败，可记录原因并以 GitHub Actions 或可用 CI 复验结果为最终证据。
 
 ## 3. 依赖关系
 
@@ -72,7 +72,7 @@
 
 ## 4. 可并行部分
 
-- README/`.env.example` 与 `.gitlab-ci.yml` 可并行。
+- README/`.env.example` 与 CI 配置可并行。
 - SPEC 与 PLAN 可由两个 subagent 草拟，但最终需要人工统一术语和验收标准。
 - 测试验证和文档清单检查可并行执行。
 
@@ -81,6 +81,6 @@
 - AI4SE 五份核心文档存在且内容覆盖作业要求。
 - README 可支持陌生用户冷启动。
 - 旧 P0-P4 和 outputs 已删除。
-- `.gitlab-ci.yml` 有 `unit-test` job。
+- `.gitlab-ci.yml` 和 `.github/workflows/ci.yml` 有 `unit-test` job。
 - 后端测试与前端构建通过。
 - Docker 生产镜像构建结果已记录。

@@ -54,6 +54,10 @@
 
 `.gitlab-ci.yml` 曾退化为 Alpine echo smoke test，不满足期末要求。整理后计划改为包含 `unit-test` 的真实 GitLab CI，并增加前端 build 与 Docker build 验证。
 
+### 迭代 3.1：迁移 GitHub Actions 作为主要 CI 凭证
+
+后续了解到学校 GitLab CI 失败与学校网站/平台环境有关，不完全代表项目构建状态。为避免平台问题影响最终提交证据，仓库迁移到 GitHub 后使用 `.github/workflows/ci.yml` 运行同等检查：后端 `mvn test`、前端 `npm ci && npm run build`、后端/前端 Docker 镜像构建。`.gitlab-ci.yml` 继续保留，作为原要求兼容配置。
+
 ### 迭代 4：反思报告处理方式
 
 作业要求反思报告必须由本人负责真实性和最终表达。用户要求先由 Codex 垫付完成候选稿，因此 `REFLECTION.md` 已覆盖要求中的主要问题点，并在文末说明 AI 辅助范围；最终提交前仍需本人确认经历、事实和措辞是否真实。
@@ -91,7 +95,7 @@
 - 缺陷：旧文档没有凭据威胁模型。
   - 修订：SPEC 新增安全与凭据威胁模型，明确本项目不使用 LLM API Key。
 - 缺陷：旧 CI 不运行测试。
-  - 修订：GitLab CI 新增 `unit-test` job。
+  - 修订：GitLab CI 新增 `unit-test` job，GitHub Actions 同步新增 `unit-test`、`frontend-build`、`docker-build`。
 - 缺陷：冷启动代理无法仅凭 SPEC/PLAN 判断目录结构、数据库初始化和生产变量名。
   - 修订：README、SPEC、PLAN 补充目录、初始化、管理员账号、健康检查和变量名一致性。
 

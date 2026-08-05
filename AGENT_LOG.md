@@ -81,6 +81,15 @@
 - Git 提交：AI4SE 提交包整理与日志补记提交已推送到 `origin/main`。最终提交点以 `git log -1 --oneline` 为准，避免在日志文件中硬编码自引用 commit hash。
 - CI 状态：本机未安装 `glab`，无法从命令行直接读取 GitLab pipeline 结果。提交后需要在 GitLab Web CI/CD 页面确认最新 pipeline pass，并在最终提交材料中记录截图或状态。
 
+## 2026-08-05 - GitHub 迁移准备
+
+- 用户反馈：学校 GitLab pipeline 未通过，经老师了解属于学校网站/平台问题，因此计划迁移到 GitHub。
+- 变更：
+  - 将 `.github/workflows/ci.yml` 调整为 AI4SE 等价 CI：`unit-test`、`frontend-build`、`docker-build`。
+  - 保留 `.gitlab-ci.yml`，用于满足原作业检查项和历史兼容。
+  - README 和过程文档改为说明 GitHub Actions 作为主要 CI 凭证。
+- 后续：需要将仓库推送到 GitHub，并在 GitHub Actions 页面确认最新 run pass。
+
 ## 偏离与教训
 
 - 偏离：项目并非从空仓库开始，无法完整还原所有历史功能的“先红后绿”TDD 过程。

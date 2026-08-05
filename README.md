@@ -111,7 +111,7 @@ npm run build
 docker compose -f docker-compose-prod.yml build
 ```
 
-GitLab CI 配置见 `.gitlab-ci.yml`，其中 `unit-test` job 会运行后端测试；`frontend-build` job 会运行前端依赖安装和构建；`docker-build` job 会验证生产镜像可构建。
+GitHub Actions 配置见 `.github/workflows/ci.yml`，其中 `unit-test` job 会运行后端测试；`frontend-build` job 会运行前端依赖安装和构建；`docker-build` job 会验证生产镜像可构建。`.gitlab-ci.yml` 保留同等检查项，作为原学校 GitLab 提交要求的兼容配置。
 
 ## Docker 分发
 
@@ -185,7 +185,7 @@ REFLECTION.md            反思报告提交候选稿
 
 ## AI4SE 提交说明
 
-本项目按个人 AI4SE 期末项目提交整理。历史上该代码库曾包含团队课程过程材料，本次整理已移除旧 P0-P4 文档与生成附件，保留可运行源码、测试、CI、容器分发配置和 AI4SE 要求的过程文档。
+本项目按个人 AI4SE 期末项目提交整理。历史上该代码库曾包含团队课程过程材料，本次整理已移除旧 P0-P4 文档与生成附件，保留可运行源码、测试、CI、容器分发配置和 AI4SE 要求的过程文档。由于学校 GitLab CI 环境存在非项目原因的不稳定，本项目迁移到 GitHub 后以 GitHub Actions 最新运行结果作为主要 CI 凭证。
 
 线上部署 URL：
 
