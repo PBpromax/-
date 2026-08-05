@@ -107,9 +107,9 @@
 - 操作：安装 Docker Engine 与 Docker Compose v2；服务器无法直连 GitHub 和 Docker Hub，因此通过 SSH 传输已验证的源码，并为 Docker 配置镜像加速。
 - 凭据：在服务器生成 `DB_PASSWORD`、`DB_ROOT_PASSWORD` 和 `CAMPUSHUB_JWT_SECRET`，写入权限为 `600` 的 `/home/admin/campushub/.env`；未写入仓库或日志。
 - 资源处理：为 2 GiB 规格实例增加 2 GiB swap，避免 Maven 构建期间内存不足。
-- 端口处理：发现宿主机 Nginx 的 OMS 服务占用公网 `80`。保留该服务，将 CampusHub 容器绑定到 `127.0.0.1:8080`，由宿主机 Nginx 按公网 IP 反向代理请求。
-- 验证：`/api/v1/health` 返回 `{"code":200,..."status":"UP"}`；容器前端入口和公网 `http://101.132.133.42/` 均返回 HTTP `200`。
-- 人工判断：不停止服务器既有 OMS 服务，采用隔离端口加反向代理的部署方式，减少对现有服务器用途的影响。
+- 端口处理：发现宿主机 Nginx 的 OMS 服务占用公网 `80`。首次尝试宿主机 Nginx 反向代理后，浏览器仍命中 OMS 页面；因此撤销该配置，改为让 CampusHub 容器独立监听公网 `8088`。
+- 验证：`/api/v1/health` 返回 `{"code":200,..."status":"UP"}`；容器前端入口和公网 `http://101.132.133.42:8088/` 均返回 HTTP `200`。
+- 人工判断：不停止服务器既有 OMS 服务，采用独立端口发布 CampusHub，减少对现有服务器用途的影响。
 
 ## 偏离与教训
 
