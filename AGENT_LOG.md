@@ -111,6 +111,14 @@
 - 验证：`/api/v1/health` 返回 `{"code":200,..."status":"UP"}`；容器前端入口和公网 `http://101.132.133.42:8088/` 均返回 HTTP `200`。
 - 人工判断：不停止服务器既有 OMS 服务，采用独立端口发布 CampusHub，减少对现有服务器用途的影响。
 
+## 2026-08-06 - Task 10 - 公网 CORS 缺陷修复
+
+- 问题：公网前端可以加载，但登录接口返回 `403 Invalid CORS request`。排查发现 `CorsConfig` 保留了旧公网 IP，未允许实际入口 `http://101.132.133.42:8088`。
+- 修复：允许实际公网来源的任意端口，并新增 `CorsConfigTest` 对登录预检请求进行回归验证。
+- 本地验证：`cd backend && mvn test` 通过，86 tests，0 failures，0 errors。
+- 部署：2 GiB 服务器无法稳定完成 Maven 镜像构建，因此在本机打包修复后的 JAR，通过 SSH 复制进现有后端容器并重启该容器；未重置数据库、Redis 或前端容器。
+- 线上验证：健康接口返回 `UP`；`OPTIONS /api/v1/auth/login` 携带 `Origin: http://101.132.133.42:8088` 返回 HTTP `200`，并返回对应 `Access-Control-Allow-Origin`；公网 `http://101.132.133.42:8088/` 返回 HTTP `200`。
+
 ## 偏离与教训
 
 - 偏离：项目并非从空仓库开始，无法完整还原所有历史功能的“先红后绿”TDD 过程。
